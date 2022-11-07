@@ -1,5 +1,5 @@
 
- # InkBall
+ # Yosef InkBall
 This repo contains inkball clone written in c++ and sfml
 
 
