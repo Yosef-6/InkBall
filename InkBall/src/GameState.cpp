@@ -3,6 +3,7 @@
 #include "Collision.h"
 #include <iostream>
 #include <SFML/Graphics/RectangleShape.hpp>
+
 GameState::GameState(StateStack& stack, sf::RenderWindow* window):State(stack,window),m_level(1),m_score(0),m_vertices(),m_lastMousePos(0,0),m_pressed(false), mOffset(-5, -25)
 {
 	m_vertices.push_back(sf::VertexArray());
@@ -59,11 +60,19 @@ bool GameState::update(sf::Time dt)
 		if (m_lastMousePos != sf::Mouse::getPosition()) 
 		{ 
 			
-		
-		    
-			m_vertices.back().append(sf::Vertex(pos,sf::Color::Black));
-			m_lineSegments[size_t(pos.x) / Inkball::CELL_SIZE][size_t(pos.y) / Inkball::CELL_SIZE].insert( { 45} );
-            m_lastMousePos = sf::Mouse::getPosition();
+		 
+			size_t locx = size_t(pos.x) / Inkball::CELL_SIZE;
+			size_t locy = size_t(pos.y) / Inkball::CELL_SIZE -1;
+			
+			if (locx < 17 && locy < 17) {
+				m_vertices.front().append(sf::Vertex(pos, sf::Color::Black));
+		        m_lineSegments[locx][locy].emplace(&(*m_vertices.begin()));
+				//std::cout <<locx << "  ,  " << locy<< " |||| " << m_vertices.size() << "    :      " << m_lineSegments[locx][locy].size() << std::endl;
+			}
+			
+			
+			m_lastMousePos = sf::Mouse::getPosition();
+
 		}
 	}
 	
@@ -80,7 +89,7 @@ bool GameState::update(sf::Time dt)
 			// use velocity vector to check for neighbouring entitys 
 			auto vel = ball.s_ball->getVelocity();
 			auto cells = Collsion::getCollsionQuadrant(pos);
-			coll = cells;
+			coll = cells; // collsion boundary  to be   removed later
 			//std::cout << pos.x <<"     " << pos.y << std::endl;
 			for (auto& cell : cells) {//cells to 
 
@@ -119,7 +128,20 @@ bool GameState::update(sf::Time dt)
 					else {
 						    //resolve any ball collsion ball - to line collsion
 						    
-						   
+						    if (m_lineSegments[cell.x][cell.y].size() > 0) {
+								
+								auto [hit,dir] = Collsion::collsionLineSegment(ball.s_ball->getSprite(),m_lineSegments[cell.x][cell.y]);
+								if (hit) {
+									std::cout << "HIT REGISTERED" << std::endl;
+									float length = Collsion::length(vel);
+									float cosAngle = Collsion::dot(-(vel/length),dir);
+								
+			
+									ball.s_ball->setVelocity( sqrt((length * length) - pow(cosAngle * length,2.0f) ) , -(cosAngle * length) );
+								}
+
+							}
+						    
 						    
 						    
 						    ///ball dynamic resoulution
@@ -163,6 +185,8 @@ bool GameState::update(sf::Time dt)
 			if (!m_level.m_levelmap[i][j].empty())
 				  (m_level.m_levelmap[i][j].back())->update(dt);
 
+
+
 	return true;
 }
 
@@ -181,9 +205,8 @@ bool GameState::handleEvent(const sf::Event& event)
 	else if (event.type == sf::Event::MouseButtonReleased)
 	{
 
-		m_vertices.push_back(sf::VertexArray());
-		m_vertices.back().setPrimitiveType(sf::LinesStrip);
-
+		m_vertices.push_front(sf::VertexArray());
+		m_vertices.front().setPrimitiveType(sf::LinesStrip);
 		m_pressed = false; // Reset line
 
 	}

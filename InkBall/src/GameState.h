@@ -5,21 +5,7 @@
 #include <list>
 #include <unordered_set>
 
-struct keyVal {
-	//std::list<sf::VertexArray>::const_iterator it;
-	size_t id;
-};
 
-namespace std {
-
-	template<>
-	struct hash<keyVal> {
-		size_t  operator()(const keyVal & k) {
-
-			return hash<size_t>()(k.id);
-		}
-	};
-}
 
 
 class GameState : public State   //directly implement all the logic here  inkball
@@ -38,6 +24,7 @@ private:
 	bool m_pressed;
 	const sf::Vector2i mOffset;
 	std::list<sf::VertexArray> m_vertices;
-	std::unordered_set<keyVal> m_lineSegments[Inkball::SCREEN_WIDTH / Inkball::CELL_SIZE][Inkball::SCREEN_WIDTH / Inkball::CELL_SIZE];
+    std::unordered_set< sf::VertexArray *> m_lineSegments[Inkball::SCREEN_WIDTH / Inkball::CELL_SIZE][Inkball::SCREEN_WIDTH / Inkball::CELL_SIZE];
 };
+
 
