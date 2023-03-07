@@ -4,7 +4,7 @@
 #include <SFML/Graphics/VertexArray.hpp>
 #include <list>
 #include <unordered_set>
-
+#include <thread>
 
 
 
@@ -17,6 +17,7 @@ public:
 	virtual bool  handleEvent(const sf::Event& event) override;
 	virtual ~GameState();
 private:
+	bool m_set;
 	Level m_level;
 	unsigned long m_score;
 	std::vector<sf::Vector2u> coll;
@@ -24,7 +25,9 @@ private:
 	bool m_pressed;
 	const sf::Vector2i mOffset;
 	std::list<sf::VertexArray> m_vertices;
-    std::unordered_set< sf::VertexArray *> m_lineSegments[Inkball::SCREEN_WIDTH / Inkball::CELL_SIZE][Inkball::SCREEN_WIDTH / Inkball::CELL_SIZE];
+	std::list<sf::VertexArray>::iterator m_remove;
+	std::unordered_set< sf::VertexArray*> m_lineSegments[Inkball::SCREEN_WIDTH / Inkball::CELL_SIZE][Inkball::SCREEN_WIDTH / Inkball::CELL_SIZE]{};
+
 };
 
 

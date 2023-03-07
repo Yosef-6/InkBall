@@ -24,7 +24,7 @@ int main()
     sf::Clock clock;
     sf::Time timeSinceLastUpdate = sf::Time::Zero;
     sf::Time timePerFrame = sf::seconds(1.0f/60.0f);
-   stack.pushState(Inkball::States::Id::TITLE);
+    stack.pushState(Inkball::States::Id::TITLE);
     while (window.isOpen())
     {
 
