@@ -11,7 +11,6 @@ State::~State()
 
 void State::requestStackPush(Inkball::States::Id stateID)
 { 
-	
 	m_Stack->pushState(stateID);
 }
 

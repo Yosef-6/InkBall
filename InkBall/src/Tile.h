@@ -10,8 +10,10 @@ public:
 		m_sprite.setPosition((float)pos.x * Inkball::CELL_SIZE, (float)pos.y * Inkball::CELL_SIZE + Inkball::CELL_SIZE); // jump one row 
 	}
 	virtual ~Tile() {}
-	virtual void onContact(Ball&) = 0;
-
+	virtual void onContact(Ball&,bool&) = 0;
+	virtual sf::FloatRect getBounds() {
+		return m_sprite.getGlobalBounds();
+	}
 protected:
 	sf::Sprite m_sprite;
 
@@ -19,8 +21,8 @@ protected:
 
 //hole cretation register holes
 #if 0
-< 0, 0 > <E, EC, C, o> track
-<0, 0><E, EC, C, o> spawn
-<0, 0><E, EC, C, o><key1x, key1y, .............>associated keys g
+< 0, 0 ><E, EC, C><velx,vely><spriteDir> track
+<0, 0><E, EC, C> spawn
+<0, 0><E, EC, C><key1x, key1y, .............>associated keys g
 #endif // 0
 

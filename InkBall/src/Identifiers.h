@@ -5,13 +5,36 @@ namespace Inkball{
 	const int SCREEN_HEIGHT = 576;
 	const int CELL_SIZE     = 32;
 	
+	enum class HitDir {
+		UP,
+		RIGHT,
+		DOWN,
+		LEFT,
+		HIT,
+		REV,
+		NOHIT,
+	};
+
+
+
+	enum class ActionType {
+		DELETE_SELF =0,
+		DELETE,
+		NONE,
+		//...
+	};
+
+	struct Action {
+		ActionType mtype;
+		size_t cellx, celly;
+		//...
+	};
 	enum class Direction {
 		DEFAULT = 0,
 		UP,
 		LEFT,
 		DOWN,
 		RIGHT
-
 	};
 	enum class Fonts {
 		TITLE = 0,
@@ -34,7 +57,7 @@ namespace Inkball{
 			BROKEN,
 			DIRECTIONAL,
 			DIRECTIONAL2,
-			KEY,
+			KEY,  // after hole logic is implemented
 			TIMER,
 			END,
 		};
@@ -53,7 +76,7 @@ namespace Inkball{
 			FLOOR = -1,
 			S_FLOOR = -2,
 			LOGO  = -3,
-			MAIN_MENU    = -4,
+			MAIN_MENU = -4,
 			//...
 		};
 	}

@@ -1,7 +1,7 @@
 #pragma once
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/Graphics/Drawable.hpp>
-
+#include "Identifiers.h"
 	class Entity : public sf::Drawable
 	{
 	
@@ -15,7 +15,7 @@
 		void setPosition(unsigned,unsigned);
         sf::Vector2u getPosition() const;
 	    sf::Vector2f getVelocity() const;
-		virtual void update(sf::Time dt);
+		virtual void update(sf::Time dt, Inkball::Action&);
 		virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const override;
 		std::size_t getID();
 	private:

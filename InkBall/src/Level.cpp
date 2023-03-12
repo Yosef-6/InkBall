@@ -32,20 +32,20 @@ void Level::loadLevel(unsigned short level) // exceptions are a handled in game 
 	std::stringstream buffer;
 	std::string entity;
 	buffer <<"res/levels/Level" << level<<".lvl";
-	std::ifstream file(buffer.str());
+	std::ifstream file(buffer.str()); 
 	if (!file.is_open()) 
 		throw std::runtime_error("Level::loadLevel - Failed to load " + buffer.str());
 	buffer.str(std::string());
 	while (std::getline(file, entity)) {
-		auto pos    = parseInp<std::size_t>(entity.substr(1,findNthOccur(entity,'>',1) - 1), 3);
+		auto pos    = parseInp<std::size_t>(entity.substr(1,findNthOccur(entity,'>',1) - 1), 2);
 		std::size_t cellx = pos[0];
 		std::size_t celly = pos[1];
 		if(cellx >= Inkball::SCREEN_WIDTH / Inkball::CELL_SIZE || celly >= Inkball::SCREEN_WIDTH / Inkball::CELL_SIZE)
 			throw std::runtime_error("Level::loadLevel - unknown format ");
 	//	std::cout<<cellx<<"   "<<celly<<std::endl;
-	    //E entity Ec entity class C color O orirentation
+	    //E entity Ec entity class C 
 		int left =  findNthOccur(entity, '<', 2) + 1; //6
-		auto entityInfo = parseInp<std::size_t>(entity.substr(left, findNthOccur(entity, '>', 2) - left), 4);
+		auto entityInfo = parseInp<std::size_t>(entity.substr(left, findNthOccur(entity, '>', 2) - left), 3);
 		if (entityInfo[0] == static_cast<std::size_t>(Inkball::Textures::EntityType::BLOCK))
 			m_levelmap[cellx][celly].emplace_back(createBlock(pos, entityInfo, entity));
 		else if (entityInfo[0] == static_cast<std::size_t>(Inkball::Textures::EntityType::TILE))
@@ -91,6 +91,28 @@ void Level::clearLevel()
 		for (std::size_t j = 0; j < Inkball::SCREEN_WIDTH / Inkball::CELL_SIZE; j++)
 			m_levelmap[i][j].clear();
 }
+
+void Level::updateLevel(sf::Time dt)
+{
+	for (std::size_t i = 0; i < Inkball::SCREEN_WIDTH / Inkball::CELL_SIZE; i++)
+		for (int j = 0; j < Inkball::SCREEN_WIDTH / Inkball::CELL_SIZE; j++)
+			if (!m_levelmap[i][j].empty()) {
+				Inkball::Action action;
+				action.mtype = Inkball::ActionType::NONE;
+				(m_levelmap[i][j].back())->update(dt,action);
+				
+				if (action.mtype == Inkball::ActionType::DELETE_SELF) 
+					m_levelmap[i][j].pop_back();
+
+		
+
+				//...cbb
+			}
+
+
+
+}
+
 
 
 
@@ -141,9 +163,12 @@ Block* Level::createBlock(const std::vector<std::size_t>& loc,const std::vector<
 		return new Key(sf::Vector2u(loc[0], loc[1]), res.getTexture(std::tuple<int, int, int>(id[0], id[1], id[2])), static_cast<Inkball::Textures::Color>(id[2]));
 		
 	
-	else if (id[1]  == static_cast<std::size_t>(Inkball::Textures::BlockType::TIMER))
-		return new Timer(sf::Vector2u(loc[0], loc[1]), res.getTexture(std::tuple<int, int, int>(id[0], id[1], id[2])), static_cast<Inkball::Textures::Color>(id[2]));
-		
+	else if (id[1] == static_cast<std::size_t>(Inkball::Textures::BlockType::TIMER)) {
+		//   <16,10><0,5,0><> timer format new last one amount of time to cycle b/n frames
+		int left1 = findNthOccur(sub, '>', 2);
+		auto tick = parseInp<float>(sub.substr(left1 + 2, 1), 1);
+		return new Timer(sf::Vector2u(loc[0], loc[1]), res.getTexture(std::tuple<int, int, int>(id[0], id[1], id[2])), static_cast<Inkball::Textures::Color>(id[2]),tick[0]);
+	}
     throw std::runtime_error("Level::loadLevel - failed due to unknown format");
 }
 
@@ -170,9 +195,9 @@ Tile* Level::createTile(const std::vector<std::size_t>& loc,const std::vector<st
 	//id 0 , 1 , 2, 3  corresponds to
 	//   E   Ec  C  O  (entityType, entityClass,Color,Orientaion)
 #if 0
-	    < 0, 0 > <E, EC, C, o> track
-		<0, 0><E, EC, C, o> spawn
-		<0, 0><E, EC, C, o><NoKey><key1x, key1y, .............>associated keys g holees
+	    < 0, 0 ><E, EC, C> track
+		<0, 0><E, EC, C> spawn
+		<0, 0><E, EC, C><NoKey><key1x, key1y, .............>associated keys g holees
 		       6          13
 			3   1,2,2,2,2,2
 			4   1,2,3,4,5,6,7,8
@@ -191,6 +216,8 @@ Tile* Level::createTile(const std::vector<std::size_t>& loc,const std::vector<st
 				leftP = findNthOccur(sub, '<', 4);
 				auto keys = parseInp<std::size_t>(sub.substr(leftP + 1, (keyCount * 4) - 1), keyCount * 2);
 				std::shared_ptr<std::vector<std::tuple<std::size_t, std::size_t>>>  sharedKeys = std::make_shared<std::vector<std::tuple<std::size_t, std::size_t>>>();
+				if(keys.size()%2 != 0 )
+					throw std::runtime_error("Level::loadLevel - failed due to unknown format");
 				for (std::size_t i = 0; i < keys.size(); i += 2) 
 					sharedKeys->emplace_back(keys[i], keys[i + 1]);
 
@@ -208,8 +235,16 @@ Tile* Level::createTile(const std::vector<std::size_t>& loc,const std::vector<st
         }
 		else if (id[1] == static_cast<std::size_t>(Inkball::Textures::TileType::SPAWN))
 			return new spawn(sf::Vector2u(loc[0], loc[1]), res.getTexture(std::tuple<int, int, int>(id[0], id[1], id[2])));
-		else if (id[1] == static_cast<std::size_t>(Inkball::Textures::TileType::TRACK))
-			return new Track(sf::Vector2u(loc[0], loc[1]), res.getTexture(std::tuple<int, int, int>(id[0], id[1], id[2])));
+		else if (id[1] == static_cast<std::size_t>(Inkball::Textures::TileType::TRACK)) {
+
+			int left1 = findNthOccur(sub, '>', 2);
+			auto vel = parseInp<float>(sub.substr(left1 + 2, findNthOccur(sub, '>', 3) - left1 + 1 ), 2);
+			left1 = findNthOccur(sub,'>',3) + 2 ;
+			auto dir = parseInp<std::size_t>(sub.substr(left1, 1), 1);
+			if (left1 == -1)
+				throw std::runtime_error("Level::loadLevel - failed due to unknown format");                                                                    //this velocity is used for track component  not for the track itself
+			return new Track(sf::Vector2u(loc[0], loc[1]), res.getTexture(std::tuple<int, int, int>(id[0], id[1], id[2])), static_cast<Inkball::Direction>(dir[0]),sf::Vector2f(vel[0],vel[1])); // set the velocity for track
+		}
 		else
 		throw std::runtime_error("Level::loadLevel - failed due to unknown format");
 }

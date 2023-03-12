@@ -79,7 +79,7 @@ bool GameState::update(sf::Time dt)
 			size_t locy = size_t(pos.y) / Inkball::CELL_SIZE;
 			///)
 
-			if (locx < 17 && locy < 17 && Collsion::length(sf::Vector2f(m_lastMousePos) - sf::Vector2f(sf::Mouse::getPosition())) < 45.0f) {
+			if (locx < 17 && locy < 17 && Collsion::length(sf::Vector2f(m_lastMousePos) - sf::Vector2f(sf::Mouse::getPosition())) < 40.0f) {
 				if (m_vertices.size() == 0) {
 					m_vertices.push_front(sf::VertexArray());
 					m_vertices.front().setPrimitiveType(sf::LinesStrip);
@@ -95,7 +95,6 @@ bool GameState::update(sf::Time dt)
 			}
 			m_lastMousePos = sf::Mouse::getPosition();
 			
-
 
 		}
 	}
@@ -125,37 +124,41 @@ bool GameState::update(sf::Time dt)
 						{
 							Tile* tile = (static_cast<Tile*>(&*m_level.m_levelmap[cell.x][cell.y].back()));
 							//check for precise collsions  cell.x,cell.y,Inkball::CELL_SIZE, Inkball::CELL_SIZE
-							auto [hit, dir] = Collsion::collsionEnt(ball.s_ball->getSprite(), sf::FloatRect((float)cell.x, (float)cell.y, (float)Inkball::CELL_SIZE, (float)Inkball::CELL_SIZE), true); // no recoil needed for tile entity
+							auto [hit, dir] = Collsion::collsionEnt(ball.s_ball->getSprite(),tile->getBounds(), false); // no recoil needed for tile entity
 							if (hit)
-								tile->onContact(*ball.s_ball);
-						}
+								tile->onContact(*ball.s_ball,ball.remove);
+					   	}
 						else if (m_level.m_levelmap[cell.x][cell.y].back()->getID() == (std::size_t)Inkball::Textures::EntityType::BLOCK)
 						{
 							Block* block = (static_cast<Block*>(&*m_level.m_levelmap[cell.x][cell.y].back()));
 
-							auto [hit, dir] = Collsion::collsionEnt(ball.s_ball->getSprite(), block->getBounds(), true); // block has diffrent float rects not uniform ones as tiles
-							if (hit) {
-								//resolve collsion here 
-							   // std::cout << "HIT" << (std::size_t)dir << std::endl;
-								if (dir == Collsion::HitDir::LEFT || dir == Collsion::HitDir::RIGHT)
-									ball.s_ball->setVelocity(-vel.x, vel.y);
-								else if (dir == Collsion::HitDir::DOWN || dir == Collsion::HitDir::UP)
-									ball.s_ball->setVelocity(vel.x, -vel.y);
+						    Collsion::collsionEnt(ball.s_ball->getSprite(), block->getBounds(), false); //first with no recoil if vel vector is allowed add recoil
+							bool allow = block->allowCollision(vel, ball.s_ball->getColor());
+							if (allow) {
+								auto [hit, dir] = Collsion::collsionEnt(ball.s_ball->getSprite(), block->getBounds(), true); // block has diffrent float rects not uniform ones as tiles
+								if (hit) {
+									//resolve collsion here 
+								   // std::cout << "HIT" << (std::size_t)dir << std::endl;
+									if (dir == Inkball::HitDir::LEFT || dir == Inkball::HitDir::RIGHT)
+										ball.s_ball->setVelocity(-vel.x, vel.y);
+									else if (dir == Inkball::HitDir::DOWN || dir == Inkball::HitDir::UP)
+										ball.s_ball->setVelocity(vel.x, -vel.y);
 
-                                 block->onCollision(*ball.s_ball);
+									block->onCollision(*ball.s_ball);
 
+								}
+								else if (dir == Inkball::HitDir::REV)
+									ball.s_ball->setVelocity(-vel.x, -vel.y);
 							}
-							else if (dir == Collsion::HitDir::REV)
-								ball.s_ball->setVelocity(-vel.x, -vel.y);
 						}
 
 					}
 					else {
-						    //resolve any ball collsion ball - to line collsion
-					//	std::cout  << m_vertices.size()<< std::endl;
-						 
+						    //  resolve any ball collsion ball - to line collsion
+					       //	std::cout  << m_vertices.size()<< std::endl;
+						    sf::Vector2f inScale = ball.s_ball->getSprite().getScale();
+						    ball.s_ball->getSprite().setScale( std::clamp(   float(inScale.x + 0.02) , 0.f ,0.8f ) , std::clamp(float(inScale.y + 0.02), 0.f, 0.8f)  );
 
-						
 						    if (m_lineSegments[cell.x][cell.y].size() > 0) {
 								
 								auto [hit,dir,rem] = Collsion::collsionLineSegment(ball.s_ball->getSprite(),&m_lineSegments[cell.x][cell.y]);
@@ -210,11 +213,20 @@ bool GameState::update(sf::Time dt)
 		i++;
 	}
 
+	//remove balls from level
+	std::vector < std::vector<Level::ballInfo> ::iterator > removeList;
+	for (auto it = m_level.m_balls.begin(); it < m_level.m_balls.end(); it++) {
+		if(it->remove)
+		removeList.emplace_back(it);
+	}
 
-	for (std::size_t i = 0; i < Inkball::SCREEN_WIDTH / Inkball::CELL_SIZE; i++)
-		for (int j = 0; j < Inkball::SCREEN_WIDTH / Inkball::CELL_SIZE; j++)
-			if (!m_level.m_levelmap[i][j].empty())
-				  (m_level.m_levelmap[i][j].back())->update(dt);
+	for (const auto &it : removeList)
+		m_level.m_balls.erase(it);
+	
+
+	
+	//finaly update level
+	m_level.updateLevel(dt);
 
 
 	

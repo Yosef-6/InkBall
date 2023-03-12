@@ -6,7 +6,7 @@ class Key :  public Block
 public:
 	Key(const sf::Vector2u& pos, const sf::Texture& tex, Inkball::Textures::Color color,const sf::Vector2f& vel = sf::Vector2f()) :Block(vel, pos, tex, color),m_animationObj(&m_sprite,5,false,100),m_unlocked(false){}
 	virtual ~Key() {}
-	virtual void update(sf::Time dt) override {
+	virtual void update(sf::Time dt, Inkball::Action& action) override {
 		if (m_unlocked) {
 			m_animationObj.updateState(dt.asSeconds());
 

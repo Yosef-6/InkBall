@@ -6,22 +6,7 @@
 #include <list>
 #include <unordered_set>
 namespace Collsion {
-	enum class HitDir {
-		UP,
-		RIGHT,
-		DOWN,
-		LEFT,
-#if 0
-		TOP_LEFT_CORNER,
-		TOP_RIGHT_CORNER,
-		BOT_LEFT_CORNER,
-		BOT_RIGHT_CORNER,
-#endif // 0
 
-		HIT,
-		REV,
-		NOHIT,
-	};
 	using Vec2 = sf::Vector2f;
 	using Vec2u = sf::Vector2u;
 	static float dot(const Vec2& vc1, const Vec2& vc2) {
@@ -39,7 +24,7 @@ namespace Collsion {
 
 	}
 
-	static std::tuple<bool, HitDir > collsionEnt(sf::Sprite& ball, const sf::FloatRect& EntBounds, bool recoil) { // since the block is imvable const &
+	static std::tuple<bool, Inkball::HitDir > collsionEnt(sf::Sprite& ball, const sf::FloatRect& EntBounds, bool recoil) { // since the block is imvable const &
 
 		auto ballBounds = ball.getGlobalBounds();
 		Vec2 ballPos = Vec2(ballBounds.left + ballBounds.width / 2.0f, ballBounds.top + ballBounds.height / 2.0f);
@@ -49,18 +34,21 @@ namespace Collsion {
 
 		Vec2 D = Vec2(Nx, Ny) - ballPos;
 		if (D.x == 0 && D.y == 0)
-			return { false,HitDir::REV };
+			return { false,Inkball::HitDir::REV};
 
 		float overlap = ballBounds.width / 2.0f - length(D);
-		if (overlap > 0.0f) {
-			auto amount = -D / length(D) * overlap;
-			ball.setPosition(amount + ballPos + Vec2(-ballBounds.width / 2.0f, -ballBounds.height / 2.0f));
-		}
-		else
-			return  { false , HitDir::NOHIT };
+		
+
+		
+		if(overlap <= 0.0f)
+			return  { false , Inkball::HitDir::NOHIT };
 
 		if (!recoil)
-			return { true , HitDir::HIT };
+			return { true , Inkball::HitDir::HIT };
+
+		auto amount = -D / length(D) * overlap;
+		ball.setPosition(amount + ballPos + Vec2(-ballBounds.width / 2.0f, -ballBounds.height / 2.0f));
+
 		Vec2 dirs[4] = {
 			{0.0f, 1.0f},
 			{1.0f, 0.0f},
@@ -88,7 +76,7 @@ namespace Collsion {
 
 		}
 
-		return { true , (HitDir)match };
+		return { true , (Inkball::HitDir)match };
 
 	}// collsion with a entity
 	static bool collsionBall(sf::Sprite& ball1, sf::Sprite& ball2) {

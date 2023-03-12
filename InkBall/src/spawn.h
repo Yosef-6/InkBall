@@ -7,12 +7,12 @@ public:
 
 	}
 	virtual ~spawn() {}
-	void update(sf::Time dt) override {
+	void update(sf::Time dt, Inkball::Action& action) override {
 	}
 	virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const override {
 		target.draw(m_sprite, states);
 	}
-	void onContact(Ball& ball) override {
+	void onContact(Ball& ball,bool& remove) override {
 		//
 		//
 		//

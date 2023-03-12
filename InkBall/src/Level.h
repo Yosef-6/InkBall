@@ -14,11 +14,12 @@ class Level
 public:
 	
 	struct ballInfo {
-		ballInfo(Ball* ball, float spawn) : s_ball(ball), s_spawnAfter(sf::seconds(spawn)),s_ready(false) {}
+		ballInfo(Ball* ball, float spawn) : s_ball(ball), s_spawnAfter(sf::seconds(spawn)),s_ready(false),remove(false) {}
 		void status(sf::Time dt);
 		std::unique_ptr<Ball> s_ball;
 		sf::Time s_spawnAfter;
 		bool s_ready;
+		bool remove;
 	};
 	Level();
 	Level(unsigned short level);
@@ -27,6 +28,7 @@ public:
 	void loadPrev();
 	void saveLevel(const std::string& filename);
 	void clearLevel();
+	void updateLevel(sf::Time dt);
 	std::vector<std::unique_ptr<Entity>> m_levelmap[Inkball::SCREEN_WIDTH / Inkball::CELL_SIZE][Inkball::SCREEN_WIDTH / Inkball::CELL_SIZE]; // height is used for drawing score and like
 	std::vector<ballInfo> m_balls;
 	std::vector<std::unique_ptr<sf::Sprite>>m_levelHud;

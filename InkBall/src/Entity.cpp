@@ -39,7 +39,7 @@ sf::Vector2f Entity::getVelocity() const
 	return m_velocity;
 }
 
-void Entity::update(sf::Time dt)
+void Entity::update(sf::Time dt, Inkball::Action& action)
 {
 }
 

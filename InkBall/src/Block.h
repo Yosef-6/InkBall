@@ -2,7 +2,6 @@
 #include "Entity.h"
 #include "Identifiers.h"
 #include <SFML/Graphics/Sprite.hpp>
-#include <iostream>
 class Ball;
 class Block : public Entity
 {
@@ -16,6 +15,9 @@ public:
 	virtual void onCollision(Ball&) = 0;
 	virtual sf::FloatRect getBounds() {
 		return m_sprite.getGlobalBounds();
+	}
+	virtual bool allowCollision(sf::Vector2f vel,Inkball::Textures::Color color) {
+		return true;
 	}
 protected:
 	sf::Sprite m_sprite;
