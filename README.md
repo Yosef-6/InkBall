@@ -1,7 +1,8 @@
 
- # Yosef InkBall
-This repo contains inkball clone written in c++ and sfml 
-Every behaviour of each entity is compleated change the lvl1 file to see various objects and there interactions
+ # InkBall
+## This repo contains inkball clone written in c++ and sfml 
+---
+Every behaviour of each entity is compleated change the lvl1 (lvl editor will be soon added ;) file to see various objects and there interactions
 ---
 
 
