@@ -2,8 +2,8 @@
  # InkBall
 ## This repo contains inkball clone written in c++ and sfml 
 ---
-Every behaviour of each entity is compleated change the lvl1 (lvl editor will be soon added ;) file to see various objects and there interactions
----
+- Every behaviour of each entity is compleated change the lvl1 (lvl editor will be soon added ;) file to see various objects and there interactions
+--
 
 
 <img src="https://user-images.githubusercontent.com/95920190/224821485-44cc84a3-e0dc-44fa-ba84-4458348ac181.PNG" width="30%" ></img>
