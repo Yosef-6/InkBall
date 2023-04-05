@@ -37,10 +37,8 @@ namespace Inkball{
 		RIGHT
 	};
 	enum class Fonts {
-		TITLE = 0,
+
 		TEXT1,
-		TEXT2,
-		TEXT3,
 
 	};
 	namespace Textures {
@@ -77,6 +75,9 @@ namespace Inkball{
 			S_FLOOR = -2,
 			LOGO  = -3,
 			MAIN_MENU = -4,
+			ERROR_PREVIEW = -5,
+			MENU_RIGHT = -6,
+			Menu_LEFT  = -7,
 			//...
 		};
 	}
@@ -94,6 +95,8 @@ namespace Inkball{
 		enum class SoundEffects{
             HOVER,
 			BALL_COLLIDE,
+			MENU_CLICK,
+			LEVEL_SELECT
 		};
 	}
 	

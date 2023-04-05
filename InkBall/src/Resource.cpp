@@ -3,11 +3,19 @@
 
 Resource Resource::m_resource;
 
-void Resource::init()
+bool Resource::init()
 {
-	loadTextures();
-	//loadSoundEffects();
+	try {
+		loadTextures();
+		loadSoundEffects();
+		loadFonts();
+	}
+	catch (...) {
+		isInit = false;
+		return false;
+	}
 	isInit = true;
+	return true;
 }
 
 void Resource::shutDown()
@@ -72,24 +80,25 @@ void Resource::loadTextures() //loads all the textures
 	m_textureHolder.load(std::tuple<int,int,int>(static_cast<int>(Inkball::Textures::OtherType::LOGO),0,0),"res/textures/InkBallLogo.png");
 	m_textureHolder.load(std::tuple<int, int, int>(static_cast<int>(Inkball::Textures::OtherType::FLOOR), 0, 0), "res/textures/floor.png");
 	m_textureHolder.load(std::tuple<int, int, int>(static_cast<int>(Inkball::Textures::OtherType::S_FLOOR), 0, 0), "res/textures/splashFloor.png");
-	// load fonts
-	m_fontHolder.load(Inkball::Fonts::TITLE,"res/fonts/code/CODE Bold.otf");
-	m_fontHolder.load(Inkball::Fonts::TEXT1, "res/fonts/bellerose/Bellerose.ttf");
-	m_fontHolder.load(Inkball::Fonts::TEXT2, "res/fonts/lemon_milk/LEMONMILK-Light.otf");
-	m_fontHolder.load(Inkball::Fonts::TEXT3, "res/fonts/nasalization/nasalization-rg.otf");
-
+	m_textureHolder.load(std::tuple<int, int, int>(static_cast<int>(Inkball::Textures::OtherType::ERROR_PREVIEW), 0, 0), "res/textures/errorPreview.png");
+	
 }
 
 void Resource::loadSoundEffects()
 {
-	//m_soundEffecteHolder.load();
+	m_soundEffecteHolder.load(Inkball::Sound::SoundEffects::HOVER, "res/soundEffects/hover.wav");
+	m_soundEffecteHolder.load(Inkball::Sound::SoundEffects::MENU_CLICK, "res/soundEffects/menu_click.wav");
+	m_soundEffecteHolder.load(Inkball::Sound::SoundEffects::LEVEL_SELECT, "res/soundEffects/level_click.wav");
+	
 }
 
-sf::Texture& Resource::getTexture(const std::tuple<int, int, int>& ID)
-{   
-	assert(isInit);
-	return m_textureHolder.get(ID);
+void Resource::loadFonts()
+{
+	// load fonts
+	m_fontHolder.load(Inkball::Fonts::TEXT1, "res/fonts/nasalization/nasalization-rg.otf");
 }
+
+
 
 const sf::Texture& Resource::getTexture(const std::tuple<int, int, int>& ID) const
 {
@@ -97,10 +106,13 @@ const sf::Texture& Resource::getTexture(const std::tuple<int, int, int>& ID) con
 	return m_textureHolder.get(ID);
 }
 
-sf::Font& Resource::getFont(Inkball::Fonts ID)
-{
+
+
+const sf::SoundBuffer& Resource::getSoundBuffer(Inkball::Sound::SoundEffects ID) const
+{    
 	assert(isInit);
-	return m_fontHolder.get(ID);
+	return m_soundEffecteHolder.get(ID);
+
 }
 
 const sf::Font& Resource::getFont(Inkball::Fonts ID) const

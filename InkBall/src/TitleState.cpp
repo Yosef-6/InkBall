@@ -8,9 +8,9 @@ TitleState::TitleState(StateStack& stack, sf::RenderWindow* window) :State(stack
     const Resource& res = Resource::getResourceHandle();
     m_logo.setTexture(res.getTexture(std::tuple<int, int, int>(static_cast<int>(Inkball::Textures::OtherType::LOGO), 0, 0)));
     m_backg.setTexture(res.getTexture(std::tuple<int, int, int>(static_cast<int>(Inkball::Textures::OtherType::S_FLOOR), 0, 0)));
-    m_text.setFont(res.getFont(Inkball::Fonts::TEXT3));
-    m_Inkball.setFont(res.getFont(Inkball::Fonts::TEXT3));
-    m_message.setFont(res.getFont(Inkball::Fonts::TEXT3));
+    m_text.setFont(res.getFont(Inkball::Fonts::TEXT1));
+    m_Inkball.setFont(res.getFont(Inkball::Fonts::TEXT1));
+    m_message.setFont(res.getFont(Inkball::Fonts::TEXT1));
     m_message.setOutlineThickness(2);
     m_Inkball.setOutlineThickness(2);
     m_text.setOutlineThickness(2);
@@ -56,7 +56,7 @@ bool TitleState::handleEvent(const sf::Event& event)
 {
     if (event.type == sf::Event::KeyPressed) {
         requestStackPop();
-        requestStackPush(Inkball::States::Id::GAME);  //testing 
+        requestStackPush(Inkball::States::Id::MAIN_MENU);  
     }
     return true;
 }

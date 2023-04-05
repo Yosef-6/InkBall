@@ -1,5 +1,6 @@
 #include "Level.h"
 #include <fstream>
+#include <SFML/Graphics/Sprite.hpp>
 #include "Hole.h"
 #include "Track.h"
 #include "spawn.h"
@@ -8,6 +9,7 @@
 #include "Broken.h"
 #include "Colored.h"  
 #include "Directional.h"
+
 
 
 //
@@ -27,7 +29,7 @@ Level::Level(unsigned short level):m_levelNo(level)
 	loadLevel(m_levelNo);
 }
 
-void Level::loadLevel(unsigned short level) // exceptions are a handled in game state
+bool Level::loadLevel(unsigned short level) // exceptions are a handled in game state
 {
 	std::stringstream buffer;
 	std::string entity;
@@ -65,18 +67,122 @@ void Level::loadLevel(unsigned short level) // exceptions are a handled in game 
 	loadHud();
 }
 
-void Level::loadNext()
+void Level::loadPreview(sf::RenderTexture& base, unsigned short level)
 {
-	
-	clearLevel();
-	loadLevel(m_levelNo++);
-}
 
-void Level::loadPrev()
-{
-	
-	clearLevel();
-	loadLevel(m_levelNo--);
+	const Resource& res = Resource::getResourceHandle();
+
+	if (!base.create(Inkball::SCREEN_WIDTH, Inkball::SCREEN_WIDTH)) // 
+		return;
+
+	std::stringstream buffer;
+	std::string entity;
+	buffer << "res/levels/Level" << level << ".lvl";
+	std::ifstream file(buffer.str());
+	if (!file.is_open()) {
+
+		base.draw(sf::Sprite(res.getTexture(std::tuple(static_cast<int>(Inkball::Textures::OtherType::ERROR_PREVIEW), 0, 0))));
+		return;
+	}
+	else
+		base.draw(sf::Sprite(res.getTexture(std::tuple(static_cast<int>(Inkball::Textures::OtherType::FLOOR), 0, 0))));
+
+	buffer.str(std::string());
+	try {
+		while (std::getline(file, entity)) {
+
+			sf::Sprite tempBuffer;
+
+			auto pos = parseInp<std::size_t>(entity.substr(1, findNthOccur(entity, '>', 1) - 1), 2);
+			std::size_t cellx = pos[0];
+			std::size_t celly = pos[1];
+			if (cellx >= Inkball::SCREEN_WIDTH / Inkball::CELL_SIZE || celly >= Inkball::SCREEN_WIDTH / Inkball::CELL_SIZE)
+				throw std::runtime_error("Level::loadPreview - unknown format ");
+
+			int left = findNthOccur(entity, '<', 2) + 1; //6
+			auto entityInfo = parseInp<std::size_t>(entity.substr(left, findNthOccur(entity, '>', 2) - left), 3);
+			if (entityInfo[0] == static_cast<std::size_t>(Inkball::Textures::EntityType::BLOCK)) {
+
+				if (entityInfo[1] == static_cast<std::size_t>(Inkball::Textures::BlockType::COLORED) || entityInfo[1] == static_cast<std::size_t>(Inkball::Textures::BlockType::BROKEN)) {
+					tempBuffer.setPosition(pos[0] * Inkball::CELL_SIZE, pos[1] * Inkball::CELL_SIZE);
+					tempBuffer.setTexture(res.getTexture(std::tuple<int, int, int>(entityInfo[0], entityInfo[1], entityInfo[2])));
+					base.draw(tempBuffer);
+				}
+
+				else if (entityInfo[1] == static_cast<std::size_t>(Inkball::Textures::BlockType::DIRECTIONAL) || entityInfo[1] == static_cast<std::size_t>(Inkball::Textures::BlockType::DIRECTIONAL2)) {
+					//direction 0 spriteDir 1 logicDir
+					int left1 = findNthOccur(entity, '>', 2);
+					if (left1 == -1)
+						throw std::runtime_error("Level::loadPreview - failed due to unknown format");
+					auto direction = parseInp<std::size_t>(entity.substr(left1 + 2, 3), 2);
+					tempBuffer.setPosition(pos[0] * Inkball::CELL_SIZE, pos[1] * Inkball::CELL_SIZE);
+					tempBuffer.setOrigin(Inkball::CELL_SIZE / 2.0f, Inkball::CELL_SIZE / 2.0f);
+					tempBuffer.rotate(direction[0] * -90.0f);
+					tempBuffer.setPosition(pos[0] + Inkball::CELL_SIZE / 2.0f, pos[1] + Inkball::CELL_SIZE / 2.0f);
+					base.draw(tempBuffer);
+				}
+				else if (entityInfo[1] == static_cast<std::size_t>(Inkball::Textures::BlockType::KEY) || entityInfo[1] == static_cast<std::size_t>(Inkball::Textures::BlockType::TIMER)) {
+					tempBuffer.setPosition(pos[0] * Inkball::CELL_SIZE, pos[1] * Inkball::CELL_SIZE);
+					tempBuffer.setTexture(res.getTexture(std::tuple<int, int, int>(entityInfo[0], entityInfo[1], entityInfo[2])));
+					tempBuffer.setTextureRect(sf::IntRect(0,0,Inkball::CELL_SIZE,Inkball::CELL_SIZE));
+					base.draw(tempBuffer);
+				}
+				else
+				throw std::runtime_error("Level::loadPreview - failed due to unknown format");
+
+			}
+			else if (entityInfo[0] == static_cast<std::size_t>(Inkball::Textures::EntityType::TILE)) {
+
+
+
+				if (entityInfo[1] == static_cast<std::size_t>(Inkball::Textures::TileType::HOLE)) {
+					size_t leftP = findNthOccur(entity, '<', 3);
+					size_t rightp = findNthOccur(entity, '>', 3);
+					if (leftP <= 0 || rightp <= 0 || pos[0] >= 15 || pos[1] >= 15)
+						throw std::runtime_error("Level::loadPreview - failed due to unknown format");
+
+					tempBuffer.setPosition(pos[0] * Inkball::CELL_SIZE, pos[1] * Inkball::CELL_SIZE);
+					tempBuffer.setTexture(res.getTexture(std::tuple<int, int, int>(entityInfo[0], entityInfo[1], entityInfo[2])));
+					base.draw(tempBuffer);
+
+
+				}
+				else if (entityInfo[1] == static_cast<std::size_t>(Inkball::Textures::TileType::SPAWN)) {
+					tempBuffer.setPosition(pos[0] * Inkball::CELL_SIZE, pos[1] * Inkball::CELL_SIZE);
+					tempBuffer.setTexture(res.getTexture(std::tuple<int, int, int>(entityInfo[0], entityInfo[1], entityInfo[2])));
+					base.draw(tempBuffer);
+				}
+					
+				else if (entityInfo[1] == static_cast<std::size_t>(Inkball::Textures::TileType::TRACK)) {
+
+					int left1 = findNthOccur(entity, '>', 2);
+					auto vel = parseInp<float>(entity.substr(left1 + 2, findNthOccur(entity, '>', 3) - left1 + 1 ), 2);
+					left1 = findNthOccur(entity,'>',3) + 2 ;
+					auto dir = parseInp<std::size_t>(entity.substr(left1, 1), 1);
+					if (left1 == -1)
+						throw std::runtime_error("Level::loadPreview - failed due to unknown format");     
+					tempBuffer.setPosition(pos[0] * Inkball::CELL_SIZE, pos[1] * Inkball::CELL_SIZE);
+					tempBuffer.setOrigin(Inkball::CELL_SIZE / 2.0f, Inkball::CELL_SIZE / 2.0f);
+					tempBuffer.rotate(dir[0] * -90.0f);
+					tempBuffer.setPosition(pos[0] + Inkball::CELL_SIZE / 2.0f, pos[1] + Inkball::CELL_SIZE / 2.0f);
+					base.draw(tempBuffer);
+				}
+				else
+				throw std::runtime_error("Level::loadPreview - failed due to unknown format");
+
+
+			}
+						
+			else if (entityInfo[0] != static_cast<std::size_t>(Inkball::Textures::EntityType::BALL)) {
+				throw std::runtime_error("Level::loadPreview - unknown format ");
+			}
+		}
+	}
+	catch (...) {
+		file.close();
+		base.clear();
+		base.draw(sf::Sprite(res.getTexture(std::tuple(static_cast<int>(Inkball::Textures::OtherType::ERROR_PREVIEW), 0, 0))));
+	}
 }
 
 void Level::saveLevel(const std::string& filename)

@@ -4,7 +4,7 @@
 #include <SFML/Graphics/VertexArray.hpp>
 #include <list>
 #include <unordered_set>
-#include <thread>
+
 
 
 
@@ -23,7 +23,7 @@ private:
 	std::vector<sf::Vector2u> coll;
 	sf::Vector2i m_lastMousePos;
 	bool m_pressed;
-	const sf::Vector2i mOffset;
+	const sf::Vector2i mOffset{-5, -25};
 	std::list<sf::VertexArray> m_vertices;
 	std::list<sf::VertexArray>::iterator m_remove;
 	std::unordered_set< sf::VertexArray*> m_lineSegments[Inkball::SCREEN_WIDTH / Inkball::CELL_SIZE][Inkball::SCREEN_WIDTH / Inkball::CELL_SIZE]{};

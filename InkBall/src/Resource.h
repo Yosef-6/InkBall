@@ -8,14 +8,14 @@ class Resource
 {
 public:
 	Resource(const Resource& other) = delete;
-	void init();
+	bool init();
 	void shutDown();
 	static Resource& getResourceHandle();
 	void loadTextures();  // requires textures to be .png
 	void loadSoundEffects();
-	sf::Texture& getTexture(const std::tuple<int,int,int>& ID);
+	void loadFonts();
 	const sf::Texture& getTexture(const std::tuple<int, int, int>& ID) const;
-	sf::Font& getFont(Inkball::Fonts ID);
+	const sf::SoundBuffer& getSoundBuffer (Inkball::Sound::SoundEffects) const;
 	const sf::Font& getFont(Inkball::Fonts ID) const;
 	const char* EntityResource[3] = { "Block","Ball","Tile" };  // Resource names must match actual resources
 	const char* BlockResource[6] = { "Color","Broken","Directional","Directional2","Key","Timer" };

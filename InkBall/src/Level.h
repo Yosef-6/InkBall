@@ -4,7 +4,7 @@
 #include <vector>
 #include <sstream>
 #include "Identifiers.h"
-
+#include <SFML/Graphics/RenderTexture.hpp>
 #include "Tile.h"
 #include "Block.h"
 #include "Ball.h"
@@ -23,19 +23,19 @@ public:
 	};
 	Level();
 	Level(unsigned short level);
-	void loadLevel(unsigned short level);
-	void loadNext();
-	void loadPrev();
+	bool loadLevel(unsigned short level);
+	static void loadPreview(sf::RenderTexture&,unsigned short);
 	void saveLevel(const std::string& filename);
 	void clearLevel();
 	void updateLevel(sf::Time dt);
 	std::vector<std::unique_ptr<Entity>> m_levelmap[Inkball::SCREEN_WIDTH / Inkball::CELL_SIZE][Inkball::SCREEN_WIDTH / Inkball::CELL_SIZE]; // height is used for drawing score and like
 	std::vector<ballInfo> m_balls;
 	std::vector<std::unique_ptr<sf::Sprite>>m_levelHud;
+
 private:
 	template <typename T>
-	std::vector<T> parseInp(const std::string& sub, std::size_t digitNo);
-	int findNthOccur(const std::string &str, char ch, int N);
+	static std::vector<T> parseInp(const std::string& sub, std::size_t digitNo);
+	static int findNthOccur(const std::string &str, char ch, int N);
 	void loadHud();
 	//factory functions
 	Block* createBlock(const std::vector<std::size_t>& loc,const std::vector<std::size_t>&id,const std::string & sub);
@@ -44,7 +44,7 @@ private:
 	unsigned short m_levelNo;
 };
 template<typename T>
-inline std::vector<T> Level::parseInp(const std::string& sub, std::size_t digitNo)
+static std::vector<T> Level::parseInp(const std::string& sub, std::size_t digitNo)
 {
 	std::stringstream ss;
 	std::size_t left = 0;

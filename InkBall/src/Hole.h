@@ -55,7 +55,7 @@ public:
 	float dist = Collsion::length(m_holeCenter - ballCenter);
 		if ( dist < radiusOuter ) {
 		
-			ball.getSprite().setScale(inScale - sf::Vector2f(0.07, 0.07));
+			ball.getSprite().setScale(inScale - sf::Vector2f(0.07f, 0.07f));
 			ball.setVelocity(ball.getVelocity() + ( (m_holeCenter - ballCenter) / Collsion::length(m_holeCenter - ballCenter) ) * 8.0f);
 	  
 			if (dist < innerRadius) // ball is assumed to enter the hole

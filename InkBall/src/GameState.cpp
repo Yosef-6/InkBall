@@ -5,7 +5,7 @@
 #include <SFML/Graphics/RectangleShape.hpp>
 
 
-GameState::GameState(StateStack& stack, sf::RenderWindow* window):State(stack,window),m_level(1),m_score(0),m_vertices(),m_lastMousePos(0,0),m_pressed(false), mOffset(-5, -25),m_set(false),m_remove()
+GameState::GameState(StateStack& stack, sf::RenderWindow* window):State(stack,window),m_level(1),m_score(0),m_vertices(),m_lastMousePos(0,0),m_pressed(false),m_set(false),m_remove()
 {
 	
 }
