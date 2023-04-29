@@ -11,7 +11,6 @@ namespace sf
 	class RenderWindow;
 }
 class StateStack;
-
 class State
 {
 public:
@@ -23,14 +22,15 @@ public:
 	virtual void  draw() = 0;
 	virtual bool  update(sf::Time dt) = 0;
 	virtual bool  handleEvent(const sf::Event& event) = 0;
+
 protected:
 	void requestStackPush(Inkball::States::Id stateID);
+	void requestCustomStackPush(State *);
 	void requestStackPop();
 	void requestStateClear();
 	sf::RenderWindow*   m_window;
 private:
 	StateStack* m_Stack;
-
-
 };
+
 

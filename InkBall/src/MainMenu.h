@@ -4,6 +4,9 @@
 #include <vector>
 #include <SFML/Graphics/Sprite.hpp>
 #include <SFML/Graphics/Text.hpp>
+#include <functional>
+
+class GameState;
 
 class MainMenu :  public State
 {
@@ -15,6 +18,7 @@ public:
 	virtual ~MainMenu() {};
 private:
 	std::vector<sf::Text>m_items;
+	sf::Text m_menu;
 	unsigned char m_currentItemPointer = 0;
 	sf::Vector2f m_pos{0,0};
 	sf::Sound m_hover, m_click;

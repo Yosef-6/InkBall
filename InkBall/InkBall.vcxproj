@@ -159,6 +159,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\LevelManager.cpp" />
     <ClCompile Include="src\MainMenu.cpp" />
     <ClCompile Include="src\GameState.cpp" />
     <ClCompile Include="src\Level.cpp" />
@@ -173,9 +174,9 @@
     <ClCompile Include="src\State.cpp" />
     <ClCompile Include="src\StateStack.cpp" />
     <ClCompile Include="src\TitleState.cpp" />
-    <ClCompile Include="src\Transition.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\LevelManager.h" />
     <ClInclude Include="src\MainMenu.h" />
     <ClInclude Include="src\GameState.h" />
     <ClInclude Include="src\spawn.h" />
@@ -209,7 +210,6 @@
     <ClInclude Include="src\StateStack.h" />
     <ClInclude Include="src\TitleState.h" />
     <ClInclude Include="src\Util.h" />
-    <ClInclude Include="src\Transition.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

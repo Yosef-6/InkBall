@@ -74,10 +74,10 @@ namespace Inkball{
 			FLOOR = -1,
 			S_FLOOR = -2,
 			LOGO  = -3,
-			MAIN_MENU = -4,
+			MENU_FLOOR = -4,
 			ERROR_PREVIEW = -5,
 			MENU_RIGHT = -6,
-			Menu_LEFT  = -7,
+			MENU_LEFT  = -7,
 			//...
 		};
 	}
@@ -87,6 +87,7 @@ namespace Inkball{
 			GAME,
 			MAIN_MENU,
 			TITLE,
+			LEVEL_MANAGER,
 			//...
 		};
 	}

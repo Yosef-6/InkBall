@@ -19,22 +19,14 @@
 // 
 
 
-Level::Level():m_levelNo(1)
-{
-	loadLevel(m_levelNo);
-}
+Level::Level(){
 
-Level::Level(unsigned short level):m_levelNo(level)
-{
-	loadLevel(m_levelNo);
 }
-
-bool Level::loadLevel(unsigned short level) // exceptions are a handled in game state
+bool Level::loadLevel(std::string &lvl) // exceptions are a handled in game state
 {
 	std::stringstream buffer;
 	std::string entity;
-	buffer <<"res/levels/Level" << level<<".lvl";
-	std::ifstream file(buffer.str()); 
+	std::ifstream file("res/levels/" + lvl);
 	if (!file.is_open()) 
 		throw std::runtime_error("Level::loadLevel - Failed to load " + buffer.str());
 	buffer.str(std::string());
@@ -61,13 +53,12 @@ bool Level::loadLevel(unsigned short level) // exceptions are a handled in game 
 		throw std::runtime_error("Level::loadLevel - unknown format ");
 	}
 	file.close();
-	m_levelNo = level;
 
 	//load backg if it has not been loaded previously
 	loadHud();
 }
 
-void Level::loadPreview(sf::RenderTexture& base, unsigned short level)
+void Level::loadPreview(sf::RenderTexture& base, const char * path)
 {
 
 	const Resource& res = Resource::getResourceHandle();
@@ -77,8 +68,7 @@ void Level::loadPreview(sf::RenderTexture& base, unsigned short level)
 
 	std::stringstream buffer;
 	std::string entity;
-	buffer << "res/levels/Level" << level << ".lvl";
-	std::ifstream file(buffer.str());
+	std::ifstream file("res/levels/" + std::string(path));
 	if (!file.is_open()) {
 
 		base.draw(sf::Sprite(res.getTexture(std::tuple(static_cast<int>(Inkball::Textures::OtherType::ERROR_PREVIEW), 0, 0))));
@@ -87,7 +77,6 @@ void Level::loadPreview(sf::RenderTexture& base, unsigned short level)
 	else
 		base.draw(sf::Sprite(res.getTexture(std::tuple(static_cast<int>(Inkball::Textures::OtherType::FLOOR), 0, 0))));
 
-	buffer.str(std::string());
 	try {
 		while (std::getline(file, entity)) {
 
@@ -193,6 +182,7 @@ void Level::saveLevel(const std::string& filename)
 void Level::clearLevel()
 {
 	m_balls.clear();
+	m_levelHud.clear();
 	for (std::size_t i = 0; i < Inkball::SCREEN_WIDTH / Inkball::CELL_SIZE; i++)
 		for (std::size_t j = 0; j < Inkball::SCREEN_WIDTH / Inkball::CELL_SIZE; j++)
 			m_levelmap[i][j].clear();
@@ -241,9 +231,18 @@ void Level::loadHud()
 	Resource& res = Resource::getResourceHandle();
 	m_levelHud.emplace_back(new sf::Sprite (res.getTexture(std::tuple<int,int,int>(static_cast<int>(Inkball::Textures::OtherType::FLOOR),0,0))));
 	//other textures
-
-
 	m_levelHud[0]->setPosition(0, Inkball::CELL_SIZE); // set floor
+	                                                   //level elements
+													   // 
+													   // 
+													   // 
+													   // 
+													   // 
+													   // 
+													   // 
+													   // 
+													   // 
+													   // 
 	//.....
 }
 

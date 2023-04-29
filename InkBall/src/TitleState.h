@@ -2,7 +2,6 @@
 #include "State.h"
 #include <SFML/Graphics/Sprite.hpp>
 #include <SFML/Graphics/Text.hpp>
-#include <vector>
 class TitleState :  public State
 {
 public:

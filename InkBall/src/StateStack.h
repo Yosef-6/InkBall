@@ -20,6 +20,7 @@ public:
 	enum class Action
 	{
 		Push,
+		Push_Custom,
 		Pop,
 		Clear,
 	};
@@ -36,6 +37,9 @@ public:
 	void	handleEvent(const sf::Event& event);
 
 	void    pushState(Inkball::States::Id stateID);
+
+	void    pushState(State* );
+
 	void	popState();
 	void	clearStates();
 	bool	isEmpty() const;
@@ -50,7 +54,9 @@ private:
 	struct PendingChange
 	{
 		explicit PendingChange(Action action,Inkball::States::Id stateID = Inkball::States::Id::NONE);
+		explicit PendingChange(Action action,State *ptr);
 
+		State* s_inject;
 		Action	                s_action;
 		Inkball::States::Id  	s_stateID;
 	};
@@ -59,7 +65,6 @@ private:
 private:
 	std::vector<State::Ptr>		m_Stack;
 	std::vector<PendingChange>	m_PendingList;
-
 	sf::RenderWindow* m_window;
 	std::map<Inkball::States::Id, std::function<State::Ptr()>> m_Factories;
 };

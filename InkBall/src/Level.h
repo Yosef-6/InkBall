@@ -22,9 +22,8 @@ public:
 		bool remove;
 	};
 	Level();
-	Level(unsigned short level);
-	bool loadLevel(unsigned short level);
-	static void loadPreview(sf::RenderTexture&,unsigned short);
+	bool loadLevel(std::string&);
+	static void loadPreview(sf::RenderTexture&,const char*);
 	void saveLevel(const std::string& filename);
 	void clearLevel();
 	void updateLevel(sf::Time dt);
@@ -41,7 +40,6 @@ private:
 	Block* createBlock(const std::vector<std::size_t>& loc,const std::vector<std::size_t>&id,const std::string & sub);
 	std::tuple<Ball*,float> createBall(const std::vector<std::size_t>& loc, const std::vector<std::size_t>& id,const std::string& sub);
 	Tile*  createTile(const std::vector<std::size_t>& loc,const std::vector<std::size_t>& id,const std::string& sub);
-	unsigned short m_levelNo;
 };
 template<typename T>
 static std::vector<T> Level::parseInp(const std::string& sub, std::size_t digitNo)

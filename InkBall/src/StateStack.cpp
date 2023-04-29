@@ -38,6 +38,10 @@ void StateStack::pushState(Inkball::States::Id stateID)
      m_PendingList.push_back(PendingChange(Action::Push, stateID));
     
 }
+void StateStack::pushState(State* ptr)
+{
+    m_PendingList.push_back(PendingChange(Action::Push_Custom, ptr));
+}
 void StateStack::popState()
 {
     m_PendingList.push_back(PendingChange(Action::Pop));
@@ -70,6 +74,11 @@ void StateStack::applyPendingChanges()
         case Action::Push:
          m_Stack.push_back(createState(change.s_stateID));
         break;
+        case Action::Push_Custom:
+            //nooo
+            m_Stack.emplace_back(change.s_inject);
+            
+         break;
         case Action::Pop:
          m_Stack.pop_back();
         break;
@@ -82,5 +91,9 @@ void StateStack::applyPendingChanges()
 }
 
 StateStack::PendingChange::PendingChange(Action action,Inkball::States::Id stateID):s_action(action),s_stateID(stateID)
+{
+}
+
+StateStack::PendingChange::PendingChange(Action action, State* ptr):s_action(action),s_inject(ptr)
 {
 }

@@ -49,7 +49,8 @@ bool TitleState::update(sf::Time dt)
         m_textBlinkTime = sf::Time::Zero;
         m_showText = !m_showText;
     }
-    return true;
+    return false;
+
 }
 
 bool TitleState::handleEvent(const sf::Event& event)

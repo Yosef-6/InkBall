@@ -5,6 +5,7 @@
 #include "Resource.h"
 #include "TitleState.h"
 #include "GameState.h"
+#include "LevelManager.h"
 #include "MainMenu.h"
 #include "imgui.h"
 #include "imgui-SFML.h"  
@@ -21,8 +22,8 @@ int main()
     sf::RenderWindow window(sf::VideoMode(544,576), "Inkball v1.0 yosef");
     StateStack stack(window);
     stack.registerState<TitleState>(Inkball::States::Id::TITLE);
-    stack.registerState<GameState>(Inkball::States::Id::GAME);
     stack.registerState<MainMenu>(Inkball::States::Id::MAIN_MENU);
+    stack.registerState<LevelManager>(Inkball::States::Id::LEVEL_MANAGER);
     ImGui::SFML::Init(window);
     sf::Clock clock;
     sf::Time timeSinceLastUpdate = sf::Time::Zero;
@@ -36,9 +37,6 @@ int main()
     tex.display();
 #endif // 0
 
-
-
-    
     
     while (window.isOpen())
     {
@@ -71,3 +69,18 @@ int main()
     ImGui::SFML::Shutdown();
     return 0;
 }
+
+#if 0
+class Solution {
+public:
+    string removeOccurrences(string s, string part) {
+        while (true) {
+            std::size_t pos = s.find(part);
+            if (pos != std::string::npos)
+                s.erase(pos, part.length());
+            else
+                return s;
+        }
+    }
+};
+#endif // 0

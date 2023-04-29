@@ -5,9 +5,11 @@
 #include <SFML/Graphics/RectangleShape.hpp>
 
 
-GameState::GameState(StateStack& stack, sf::RenderWindow* window):State(stack,window),m_level(1),m_score(0),m_vertices(),m_lastMousePos(0,0),m_pressed(false),m_set(false),m_remove()
+
+
+GameState::GameState(StateStack& stack, sf::RenderWindow* window, std::vector<std::string>&& level,size_t currLevel ): State(stack, window), m_score(0), m_vertices(), m_lastMousePos(0, 0), m_pressed(false), m_set(false), m_remove(),m_levelInfo(level),m_levelPointer(currLevel)
 {
-	
+	m_level.loadLevel(m_levelInfo[m_levelPointer]);
 }
 
  void GameState::draw()

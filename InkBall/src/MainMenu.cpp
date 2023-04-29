@@ -2,6 +2,7 @@
 #include "Resource.h"
 #include "Util.h"
 #include <SFML/Graphics/RenderWindow.hpp>
+#include "GameState.h"
 
 
 
@@ -9,12 +10,18 @@ MainMenu::MainMenu(StateStack& stack, sf::RenderWindow* window):State(stack,wind
 {  
     const Resource& handle = Resource::getResourceHandle();
 
-    m_backg.setTexture(handle.getTexture(std::tuple<int, int, int>(static_cast<int>(Inkball::Textures::OtherType::S_FLOOR), 0, 0)));
+    m_backg.setTexture(handle.getTexture(std::tuple<int, int, int>(static_cast<int>(Inkball::Textures::OtherType::MENU_FLOOR), 0, 0)));
     m_backg.setPosition(0, 0);
 
     m_hover.setBuffer(handle.getSoundBuffer(Inkball::Sound::SoundEffects::HOVER));
     m_click.setBuffer(handle.getSoundBuffer(Inkball::Sound::SoundEffects::MENU_CLICK));
-   
+    
+    m_menu.setFont(handle.getFont(Inkball::Fonts::TEXT1));
+    m_menu.setCharacterSize(40U);
+    m_menu.setString("MAIN MENU");
+    m_menu.setPosition(Inkball::SCREEN_WIDTH / 3.1f, Inkball::SCREEN_HEIGHT / 5.0f);
+    m_menu.setOutlineThickness(2);
+
     m_items.emplace_back("Play", handle.getFont(Inkball::Fonts::TEXT1),34U );
     m_items.emplace_back("Create Level", handle.getFont(Inkball::Fonts::TEXT1), 34U);
     m_items.emplace_back("Stats", handle.getFont(Inkball::Fonts::TEXT1), 34U);
@@ -31,6 +38,7 @@ MainMenu::MainMenu(StateStack& stack, sf::RenderWindow* window):State(stack,wind
 void MainMenu::draw()
 { 
     m_window->draw(m_backg);
+    m_window->draw(m_menu);
 
     unsigned char i = 0;
     for (sf::Text& text : m_items) {
@@ -49,6 +57,7 @@ void MainMenu::draw()
 bool MainMenu::update(sf::Time dt)
 {
     
+    
     unsigned char i = 0;
     for (sf::Text& text : m_items) {
 
@@ -59,6 +68,13 @@ bool MainMenu::update(sf::Time dt)
             if (m_pressed) {
                 m_click.play();
                 m_pressed = false;
+
+                std::size_t elapsedTime = 0;
+                while (m_click.getStatus() == sf::Sound::Playing);
+                requestStackPop();
+                requestStackPush(Inkball::States::Id::LEVEL_MANAGER);
+                //requestCustomStackPush(m_game());
+     
             }
             m_currentItemPointer = i;
         }

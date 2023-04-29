@@ -57,7 +57,7 @@
     <ClCompile Include="src\MainMenu.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Transition.cpp">
+    <ClCompile Include="src\LevelManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -161,7 +161,7 @@
     <ClInclude Include="src\MainMenu.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\Transition.h">
+    <ClInclude Include="src\LevelManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
