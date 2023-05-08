@@ -7,7 +7,8 @@
 
 
 
-GameState::GameState(StateStack& stack, sf::RenderWindow* window, std::vector<std::string>&& level,size_t currLevel ): State(stack, window), m_score(0), m_vertices(), m_lastMousePos(0, 0), m_pressed(false), m_set(false), m_remove(),m_levelInfo(level),m_levelPointer(currLevel)
+GameState::GameState(StateStack& stack, sf::RenderWindow* window, std::vector<std::string>&& level,size_t currLevel ): State(stack, window),
+m_score(0), m_vertices(), m_lastMousePos(0, 0), m_pressed(false), m_set(false), m_remove(),m_levelInfo(level),m_levelPointer(currLevel)
 {
 	m_level.loadLevel(m_levelInfo[m_levelPointer]);
 }
@@ -46,13 +47,6 @@ GameState::GameState(StateStack& stack, sf::RenderWindow* window, std::vector<st
 		 if (ball.s_ready)
 			 m_window->draw(*ball.s_ball);
 
-	 //remove any lines
-	 if (m_set == true) {
-		 m_vertices.erase(m_remove);
-		 m_set = false;
-	 }
-
-
      //draw lines 
 	 for (auto it = m_vertices.begin(); it != m_vertices.end(); it++) {
 		 if (it->getPrimitiveType() == sf::Triangles) {
@@ -62,6 +56,12 @@ GameState::GameState(StateStack& stack, sf::RenderWindow* window, std::vector<st
 		 else
 			 m_window->draw(*it);
 	 }
+	 //remove any lines
+	 if (m_set == true) {
+		 m_vertices.erase(m_remove);
+		 m_set = false;
+	 }
+
 		 
 	
 }
@@ -82,25 +82,25 @@ bool GameState::update(sf::Time dt)
 			///)
 
 			if (locx < 17 && locy < 17 && Collsion::length(sf::Vector2f(m_lastMousePos) - sf::Vector2f(sf::Mouse::getPosition())) < 40.0f) {
+				
 				if (m_vertices.size() == 0) {
 					m_vertices.push_front(sf::VertexArray());
 					m_vertices.front().setPrimitiveType(sf::LinesStrip);
 				}
+
 				m_vertices.front().append(sf::Vertex(pos, sf::Color::Black));
 				m_lineSegments[locx][locy].emplace(&(*m_vertices.begin()));
-				//std::cout <<locx << "  ,  " << locy<< " |||| " << m_vertices.size() << "    :      " << m_lineSegments[locx][locy].size() << std::endl;
 				
 			}
-			else {
-				m_vertices.push_front(sf::VertexArray());
-				m_vertices.front().setPrimitiveType(sf::LinesStrip);
-			}
-			m_lastMousePos = sf::Mouse::getPosition();
-			
-
+	
 		}
+		m_lastMousePos = sf::Mouse::getPosition();
 	}
 		
+	std::cout<<m_vertices.size() <<std::endl;
+
+	
+
 
 	// update balls and resolve any collsion
 	size_t i = 0; //could have used normal for loop
@@ -171,6 +171,8 @@ bool GameState::update(sf::Time dt)
 										 for (size_t j = 0; j < Inkball::SCREEN_WIDTH / Inkball::CELL_SIZE; j++) {
 											 if (m_lineSegments[l][j].find(rem) != m_lineSegments[l][j].end())
 												 m_lineSegments[l][j].erase(rem);
+											 if(m_lineSegments[l][j].find(&*m_remove) != m_lineSegments[l][j].end())
+												 m_lineSegments[l][j].erase(&*m_remove);
 										 }
 									 
 

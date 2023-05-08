@@ -31,6 +31,5 @@ private:
 	bool m_pressed;
 	std::function<GameState* ()>m_game;
 	size_t m_levelPointer = 0;
-
 };
 
