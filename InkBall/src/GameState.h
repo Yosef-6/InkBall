@@ -22,10 +22,11 @@ private:
 	Level m_level;
 	unsigned long m_score;
 	std::vector<sf::Vector2u> coll;
-	sf::Vector2i m_lastMousePos;
+	sf::Vector2f m_lastMousePos;
 	bool m_pressed;
 	const sf::Vector2i mOffset{-5, -25};
-	size_t m_levelPointer;
+	const float mSeparationCoff = 16.0f;
+	std::size_t m_levelPointer;
 	std::vector<std::string>m_levelInfo;
 	std::list< vertex > m_vertices;
 	std::list< vertex >::iterator m_remove;
