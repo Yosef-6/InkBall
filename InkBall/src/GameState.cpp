@@ -49,12 +49,13 @@ m_score(0), m_vertices(), m_lastMousePos(0, 0), m_pressed(false), m_set(false), 
 
      //draw lines 
 	 for (auto it = m_vertices.begin(); it != m_vertices.end(); it++) {
-		 if (it->getPrimitiveType() == sf::Triangles) {
+		 const auto& [arr,_, rem] = *it;
+		 if (rem) {
 			 m_remove = it;
 			 m_set = true;
 		 }
 		 else
-			 m_window->draw(*it);
+			 m_window->draw(arr);
 	 }
 	 //remove any lines
 	 if (m_set == true) {
@@ -69,38 +70,8 @@ m_score(0), m_vertices(), m_lastMousePos(0, 0), m_pressed(false), m_set(false), 
 
 bool GameState::update(sf::Time dt)
 {
-	//std::cout << m_vertices.size() << std::endl;
-	if (m_pressed)
-	{
-		sf::Vector2f pos(sf::Mouse::getPosition().x - m_window->getPosition().x + mOffset.x, sf::Mouse::getPosition().y - m_window->getPosition().y + mOffset.y);
-		if (m_lastMousePos != sf::Mouse::getPosition())
-		{
-
-
-			size_t locx = size_t(pos.x) / Inkball::CELL_SIZE;
-			size_t locy = size_t(pos.y) / Inkball::CELL_SIZE;
-			///)
-
-			if (locx < 17 && locy < 17 && Collsion::length(sf::Vector2f(m_lastMousePos) - sf::Vector2f(sf::Mouse::getPosition())) < 40.0f) {
-				
-				if (m_vertices.size() == 0) {
-					m_vertices.push_front(sf::VertexArray());
-					m_vertices.front().setPrimitiveType(sf::LinesStrip);
-				}
-
-				m_vertices.front().append(sf::Vertex(pos, sf::Color::Black));
-				m_lineSegments[locx][locy].emplace(&(*m_vertices.begin()));
-				
-			}
 	
-		}
-		m_lastMousePos = sf::Mouse::getPosition();
-	}
-		
 	std::cout<<m_vertices.size() <<std::endl;
-
-	
-
 
 	// update balls and resolve any collsion
 	size_t i = 0; //could have used normal for loop
@@ -163,16 +134,16 @@ bool GameState::update(sf::Time dt)
 
 						    if (m_lineSegments[cell.x][cell.y].size() > 0) {
 								
-								auto [hit,dir,rem] = Collsion::collsionLineSegment(ball.s_ball->getSprite(),&m_lineSegments[cell.x][cell.y]);
+								auto [hit,dir,rem] = Collsion::collsionLineSegment(ball.s_ball->getSprite(),m_lineSegments[cell.x][cell.y]);
 								if (hit) {
 								
 								     m_level.m_balls[i].s_ball->setVelocity(dir.x*100,dir.y*100);
+
 									 for(size_t l = 0; l < Inkball::SCREEN_WIDTH / Inkball::CELL_SIZE; l++)
 										 for (size_t j = 0; j < Inkball::SCREEN_WIDTH / Inkball::CELL_SIZE; j++) {
 											 if (m_lineSegments[l][j].find(rem) != m_lineSegments[l][j].end())
 												 m_lineSegments[l][j].erase(rem);
-											 if(m_lineSegments[l][j].find(&*m_remove) != m_lineSegments[l][j].end())
-												 m_lineSegments[l][j].erase(&*m_remove);
+											
 										 }
 									 
 
@@ -249,10 +220,39 @@ bool GameState::handleEvent(const sf::Event& event)
 	else if (event.type == sf::Event::MouseButtonPressed) {
 		m_pressed = true;
 	}
+	else if (event.type == sf::Event::MouseMoved) {
+		if (m_pressed)
+		{
+			sf::Vector2f pos(sf::Mouse::getPosition().x - m_window->getPosition().x + mOffset.x, sf::Mouse::getPosition().y - m_window->getPosition().y + mOffset.y);
+			if (m_lastMousePos != sf::Mouse::getPosition())
+			{
+
+
+				size_t locx = size_t(pos.x) / Inkball::CELL_SIZE;
+				size_t locy = size_t(pos.y) / Inkball::CELL_SIZE;
+				///)
+
+				if (locx < 17 && locy < 17) {
+
+					if (m_vertices.size() == 0 || !std::get<1>(m_vertices.front())) {// { ,working  ,  remove}
+						m_vertices.push_front({ sf::VertexArray(),true,false });
+						std::get<0>(m_vertices.front()).setPrimitiveType(sf::LinesStrip);
+					}
+
+					std::get<0>(m_vertices.front()).append(sf::Vertex(pos, sf::Color::Black));
+					m_lineSegments[locx][locy].emplace(&(*m_vertices.begin()));
+
+				}
+
+			}
+			m_lastMousePos = sf::Mouse::getPosition();
+		}
+
+	}
 	else if (event.type == sf::Event::MouseButtonReleased)
 	{
-
-	
+		if (m_vertices.size() > 0)
+			std::get<1>(m_vertices.front()) = false;
 		m_pressed = false; // Reset line
 
 	}

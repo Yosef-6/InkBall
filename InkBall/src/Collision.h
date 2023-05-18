@@ -96,26 +96,26 @@ namespace Collsion {
 		ball1.setPosition(ball1.getPosition() + offsetVec);
 		return true;
 	}
-	template<typename T>
-	static std::tuple <bool, Vec2,sf::VertexArray* > collsionLineSegment(sf::Sprite& ball,  T* lineSet) {
+	static std::tuple <bool, Vec2, std::tuple<sf::VertexArray, bool, bool>* > collsionLineSegment(sf::Sprite& ball, const std::unordered_set< std::tuple<sf::VertexArray, bool, bool> * >& lineSet) {
 
 		auto ballBounds = ball.getGlobalBounds();
 		Vec2 ballCenter(ballBounds.left + ballBounds.width / 2.0f, ballBounds.top + ballBounds.height / 2.0f);
 		Vec2 pt1;
+		//std::tuple<sf::vertex,bool,bool>
+		for (auto line = lineSet.begin(); line != lineSet.end(); ++line) {
 
-		for (auto line = lineSet->begin(); line != lineSet->end(); ++line) {
+		    auto& [vertex ,_,remove] = (*(*line));
+			std::size_t count = vertex.getVertexCount();
 
-			int count = (*(*line)).getVertexCount();
-			for (int i = 0; i < count; i++) {
+			for (std::size_t i = 0; i < count; i++) {
 
 
 				//std::cout << (*line)[i].position.x << "   :    " << (*line)[i].position.y << std::endl;
-				if (ballBounds.contains( (*(*line))[i].position)) {
+				if (ballBounds.contains( vertex[i].position)) {
 
-					pt1 = (*(*line))[i].position;
-					(*(*line)).setPrimitiveType(sf::Triangles);
-					(*(*line)).clear();
-					
+					pt1 = vertex[i].position;
+					vertex.clear();
+					remove = true;
 					return { true, (ballCenter - pt1) / length(ballCenter - pt1) , *line };
 
 				}
