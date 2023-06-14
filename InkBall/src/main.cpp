@@ -19,7 +19,8 @@ int main()
     if (res.init()) {
         std::cout << "READY -- " << std::endl;
     }
-    sf::RenderWindow window(sf::VideoMode(544,576), "Inkball v1.0 yosef");
+    sf::RenderWindow window(sf::VideoMode(544,576), "Inkball v1.0 yosef",sf::Style::Close);
+   
     StateStack stack(window);
     stack.registerState<TitleState>(Inkball::States::Id::TITLE);
     stack.registerState<MainMenu>(Inkball::States::Id::MAIN_MENU);
@@ -42,6 +43,7 @@ int main()
     {
 
         sf::Time dt = clock.restart();
+
         timeSinceLastUpdate += dt;
         while (timeSinceLastUpdate > timePerFrame) {
             timeSinceLastUpdate -= timePerFrame;
@@ -70,17 +72,3 @@ int main()
     return 0;
 }
 
-#if 0
-class Solution {
-public:
-    string removeOccurrences(string s, string part) {
-        while (true) {
-            std::size_t pos = s.find(part);
-            if (pos != std::string::npos)
-                s.erase(pos, part.length());
-            else
-                return s;
-        }
-    }
-};
-#endif // 0

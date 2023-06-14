@@ -36,19 +36,19 @@ void Resource::loadTextures() //loads all the textures
 	std::stringstream buffer;
 	int entity = static_cast<int>(Inkball::Textures::EntityType::BLOCK);
 	// load blocks
-	for (int i = 0; i < static_cast<int>(Inkball::Textures::BlockType::END);i++) {
-		for (int j = 0; j < static_cast<int>(Inkball::Textures::Color::END);j++) {
+	for (int i = 0; i < static_cast<int>(Inkball::Textures::BlockType::END); i++) {
+		for (int j = 0; j < static_cast<int>(Inkball::Textures::Color::END); j++) {
 			if (i == static_cast<int>(Inkball::Textures::BlockType::TIMER) && j != static_cast<int>(Inkball::Textures::Color::WHITE))
 				break;
 			if ((i == static_cast<int>(Inkball::Textures::BlockType::DIRECTIONAL2) || i == static_cast<int>(Inkball::Textures::BlockType::KEY)) && (j == static_cast<int>(Inkball::Textures::Color::WHITE)))
 				continue;
-			buffer <<"res/textures/" << EntityResource[entity] << BlockResource[i] << Color[j] << ".png";
-			m_textureHolder.load({entity,i,j},buffer.str());
+			buffer << "res/textures/" << EntityResource[entity] << BlockResource[i] << Color[j] << ".png";
+			m_textureHolder.load({ entity,i,j }, buffer.str());
 			buffer.clear();
 			buffer.str(std::string());
 		}
 	}
-	
+
 	// load Entity type tile 
 	// if block is set i dont have track and spawn with diffrent colors i coud add them as a feature
 	buffer.clear();
@@ -58,11 +58,11 @@ void Resource::loadTextures() //loads all the textures
 		for (int j = 0; j < static_cast<int>(Inkball::Textures::Color::END); j++) {
 			if ((i == static_cast<int>(Inkball::Textures::TileType::TRACK) || i == static_cast<int>(Inkball::Textures::TileType::SPAWN)) && j != static_cast<int>(Inkball::Textures::Color::WHITE))
 				break;
-				
-			    buffer <<"res/textures/" << EntityResource[entity] << TileResource[i] << Color[j] << ".png";
-				m_textureHolder.load({ entity,i,j }, buffer.str());
-				buffer.clear();
-				buffer.str(std::string());
+
+			buffer << "res/textures/" << EntityResource[entity] << TileResource[i] << Color[j] << ".png";
+			m_textureHolder.load({ entity,i,j }, buffer.str());
+			buffer.clear();
+			buffer.str(std::string());
 		}
 	}
 	buffer.clear();
@@ -70,13 +70,15 @@ void Resource::loadTextures() //loads all the textures
 	entity = static_cast<int>(Inkball::Textures::EntityType::BALL);
 	// i = 0 there is no subclass of a ball entity like blocks.. so i is set 0
 	for (int j = 0; j < static_cast<int>(Inkball::Textures::Color::END); j++) {
-		buffer<<"res/textures/" << EntityResource[entity]  << Color[j] << ".png";
+		buffer << "res/textures/" << EntityResource[entity] << Color[j] << ".png";
 		m_textureHolder.load({ entity,0,j }, buffer.str());
 		buffer.clear();
 		buffer.str(std::string());
 	}
 
 	//load other textures types 
+
+
 	m_textureHolder.load(std::tuple<int,int,int>(static_cast<int>(Inkball::Textures::OtherType::LOGO),0,0),"res/textures/InkBallLogo.png");
 	m_textureHolder.load(std::tuple<int, int, int>(static_cast<int>(Inkball::Textures::OtherType::FLOOR), 0, 0), "res/textures/floor.png");
 	m_textureHolder.load(std::tuple<int, int, int>(static_cast<int>(Inkball::Textures::OtherType::MENU_FLOOR), 0, 0), "res/textures/menuFloor.png");

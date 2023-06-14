@@ -6,7 +6,6 @@
 
 
 
-
 GameState::GameState(StateStack& stack, sf::RenderWindow* window, std::vector<std::string>&& level,size_t currLevel ): State(stack, window),
 m_score(0), m_vertices(), m_lastMousePos(0, 0), m_pressed(false), m_set(false), m_remove(),m_levelInfo(level),m_levelPointer(currLevel)
 {
@@ -49,12 +48,13 @@ m_score(0), m_vertices(), m_lastMousePos(0, 0), m_pressed(false), m_set(false), 
 
      //draw lines 
 	 for (auto it = m_vertices.begin(); it != m_vertices.end(); it++) {
-		 if (it->getPrimitiveType() == sf::Triangles) {
+		 const auto& [arr,_, rem] = *it;
+		 if (rem) {
 			 m_remove = it;
 			 m_set = true;
 		 }
 		 else
-			 m_window->draw(*it);
+			 m_window->draw(arr);
 	 }
 	 //remove any lines
 	 if (m_set == true) {
@@ -69,11 +69,14 @@ m_score(0), m_vertices(), m_lastMousePos(0, 0), m_pressed(false), m_set(false), 
 
 bool GameState::update(sf::Time dt)
 {
-	//std::cout << m_vertices.size() << std::endl;
+	
+	//std::cout<<m_vertices.size() <<std::endl;
+
+
 	if (m_pressed)
 	{
 		sf::Vector2f pos(sf::Mouse::getPosition().x - m_window->getPosition().x + mOffset.x, sf::Mouse::getPosition().y - m_window->getPosition().y + mOffset.y);
-		if (m_lastMousePos != sf::Mouse::getPosition())
+		if (m_lastMousePos != pos)
 		{
 
 
@@ -81,25 +84,43 @@ bool GameState::update(sf::Time dt)
 			size_t locy = size_t(pos.y) / Inkball::CELL_SIZE;
 			///)
 
-			if (locx < 17 && locy < 17 && Collsion::length(sf::Vector2f(m_lastMousePos) - sf::Vector2f(sf::Mouse::getPosition())) < 40.0f) {
-				
-				if (m_vertices.size() == 0) {
-					m_vertices.push_front(sf::VertexArray());
-					m_vertices.front().setPrimitiveType(sf::LinesStrip);
+			if (locx < 17 && locy < 17) {
+
+				if (m_vertices.size() == 0 || !std::get<1>(m_vertices.front())) {// { ,working  ,  remove}
+					m_vertices.push_front({ sf::VertexArray(),true,false });
+					std::get<0>(m_vertices.front()).setPrimitiveType(sf::LinesStrip);
 				}
-
-				m_vertices.front().append(sf::Vertex(pos, sf::Color::Black));
-				m_lineSegments[locx][locy].emplace(&(*m_vertices.begin()));
+				float length = Collsion::length(m_lastMousePos - pos);
+	
 				
-			}
-	
-		}
-		m_lastMousePos = sf::Mouse::getPosition();
-	}
-		
-	std::cout<<m_vertices.size() <<std::endl;
+				if (length > mSeparationCoff) {
 
-	
+					sf::Vector2f unit = (pos - m_lastMousePos) / Collsion::length(pos - m_lastMousePos);
+
+					//std::cout << length << std::endl;
+					
+					for (float i = 1;; i+=1) {
+
+						if ( i > length)
+							break;
+
+						std::get<0>(m_vertices.front()).append(sf::Vertex(m_lastMousePos + sf::Vector2f(unit.x * i, unit.y * i), sf::Color::Black));
+					}
+
+
+				}
+				std::cout << pos.x << "   " << pos.y << std::endl;
+				std::get<0>(m_vertices.front()).append(sf::Vertex(pos, sf::Color::Black));
+				m_lineSegments[locx][locy].emplace(&(*m_vertices.begin()));
+
+			}
+
+		}
+		m_lastMousePos = pos;
+	}
+	else
+		m_lastMousePos= sf::Vector2f(sf::Mouse::getPosition().x - m_window->getPosition().x + mOffset.x, sf::Mouse::getPosition().y - m_window->getPosition().y + mOffset.y);
+
 
 
 	// update balls and resolve any collsion
@@ -163,16 +184,16 @@ bool GameState::update(sf::Time dt)
 
 						    if (m_lineSegments[cell.x][cell.y].size() > 0) {
 								
-								auto [hit,dir,rem] = Collsion::collsionLineSegment(ball.s_ball->getSprite(),&m_lineSegments[cell.x][cell.y]);
+								auto [hit,dir,rem] = Collsion::collsionLineSegment(ball.s_ball->getSprite(),m_lineSegments[cell.x][cell.y]);
 								if (hit) {
 								
 								     m_level.m_balls[i].s_ball->setVelocity(dir.x*100,dir.y*100);
+
 									 for(size_t l = 0; l < Inkball::SCREEN_WIDTH / Inkball::CELL_SIZE; l++)
 										 for (size_t j = 0; j < Inkball::SCREEN_WIDTH / Inkball::CELL_SIZE; j++) {
 											 if (m_lineSegments[l][j].find(rem) != m_lineSegments[l][j].end())
 												 m_lineSegments[l][j].erase(rem);
-											 if(m_lineSegments[l][j].find(&*m_remove) != m_lineSegments[l][j].end())
-												 m_lineSegments[l][j].erase(&*m_remove);
+											
 										 }
 									 
 
@@ -180,8 +201,7 @@ bool GameState::update(sf::Time dt)
 
 							}
 						    
-						    
-						    
+					
 						    ///ball dynamic resoulution
 							for (size_t j = 0; j < m_level.m_balls.size(); j++) {
 								if (j != i && m_level.m_balls[j].s_ball->getPosition().x == cell.x && m_level.m_balls[j].s_ball->getPosition().y == cell.y) {
@@ -251,13 +271,12 @@ bool GameState::handleEvent(const sf::Event& event)
 	}
 	else if (event.type == sf::Event::MouseButtonReleased)
 	{
-
-	
+		if (m_vertices.size() > 0)
+			std::get<1>(m_vertices.front()) = false;
 		m_pressed = false; // Reset line
 
 	}
 	
-
 	return false;
 }
 
