@@ -10,7 +10,7 @@ public:
 		m_sprite.setPosition((float)pos.x * Inkball::CELL_SIZE, (float)pos.y * Inkball::CELL_SIZE + Inkball::CELL_SIZE); // jump one row 
 	}
 	virtual ~Tile() {}
-	virtual void onContact(Ball&,bool&) = 0;
+	virtual void onContact(Ball&,bool&,bool&,unsigned long&) = 0;
 	virtual sf::FloatRect getBounds() {
 		return m_sprite.getGlobalBounds();
 	}

@@ -3,6 +3,8 @@
 #include "Level.h"
 #include <SFML/Graphics/VertexArray.hpp>
 #include <list>
+#include <thread>
+#include <mutex>
 #include <unordered_set>
 
 
@@ -18,9 +20,15 @@ public:
 	virtual bool  handleEvent(const sf::Event& event) override;
 	virtual ~GameState();
 private:
+	
 	bool m_set;
+	std::size_t m_animated = 0;
 	Level m_level;
+	std::thread m_uiThread;
+	std::mutex m_key;
+	void updateUiAnim(Level::ballInfo*);
 	unsigned long m_score;
+	unsigned long m_highScore;
 	std::vector<sf::Vector2u> coll;
 	sf::Vector2f m_lastMousePos;
 	bool m_pressed;

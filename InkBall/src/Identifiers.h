@@ -39,6 +39,7 @@ namespace Inkball{
 	enum class Fonts {
 
 		TEXT1,
+		ARCADE,
 
 	};
 	namespace Textures {
@@ -78,6 +79,7 @@ namespace Inkball{
 			ERROR_PREVIEW = -5,
 			MENU_RIGHT = -6,
 			MENU_LEFT  = -7,
+			HUD=-8,
 			//...
 		};
 	}

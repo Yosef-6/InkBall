@@ -11,7 +11,7 @@ public:
 			m_frameNo  =   m_animationObj.updateState(dt.asSeconds());
 			
 	};
-	virtual void onCollision(Ball& ball)override {
+	virtual void onCollision(Ball& ball,unsigned long& score)override {
 		
 		
 	}

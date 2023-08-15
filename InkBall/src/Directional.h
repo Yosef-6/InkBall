@@ -45,7 +45,7 @@ public:
 
 	}
 	virtual void update(sf::Time dt, Inkball::Action& action) override {};
-	virtual void onCollision(Ball& ball)override {
+	virtual void onCollision(Ball& ball, unsigned long& score)override {
 		
 	}
 	virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const override {

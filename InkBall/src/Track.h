@@ -15,7 +15,7 @@ public:
 	virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const override {
 		target.draw(m_sprite, states);
 	}
-	void onContact(Ball& ball,bool& remove) override {
+	void onContact(Ball& ball,bool& remove , bool& matches,unsigned long& score) override {
 		//std::cout << " " << getVelocity().x << "   :   " << getVelocity().y << std::endl;
 		ball.setVelocity(ball.getVelocity() + getVelocity());
 	}

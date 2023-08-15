@@ -86,7 +86,8 @@ void Resource::loadTextures() //loads all the textures
 	m_textureHolder.load(std::tuple<int, int, int>(static_cast<int>(Inkball::Textures::OtherType::ERROR_PREVIEW), 0, 0), "res/textures/errorPreview.png");
 	m_textureHolder.load(std::tuple<int, int, int>(static_cast<int>(Inkball::Textures::OtherType::MENU_LEFT), 0, 0), "res/textures/arrowLeft.png");
 	m_textureHolder.load(std::tuple<int, int, int>(static_cast<int>(Inkball::Textures::OtherType::MENU_RIGHT), 0, 0), "res/textures/arrowRight.png");
-	
+	m_textureHolder.load(std::tuple<int, int, int>(static_cast<int>(Inkball::Textures::OtherType::HUD), 0, 0), "res/textures/hud.png");
+
 }
 
 void Resource::loadSoundEffects()
@@ -101,6 +102,7 @@ void Resource::loadFonts()
 {
 	// load fonts
 	m_fontHolder.load(Inkball::Fonts::TEXT1, "res/fonts/code/CODE Bold.otf");
+	m_fontHolder.load(Inkball::Fonts::ARCADE, "res/fonts/arcade/ARCADECLASSIC.ttf");
 }
 
 

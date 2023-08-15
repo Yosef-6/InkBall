@@ -12,7 +12,7 @@ public:
 		
 		m_sprite.setPosition((float)pos.x*Inkball::CELL_SIZE,(float)pos.y * Inkball::CELL_SIZE + Inkball::CELL_SIZE); // jump one row for the score and other 
 	}
-	virtual void onCollision(Ball&) = 0;
+	virtual void onCollision(Ball&,unsigned long&) = 0;
 	virtual sf::FloatRect getBounds() {
 		return m_sprite.getGlobalBounds();
 	}

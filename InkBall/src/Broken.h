@@ -10,7 +10,7 @@ public:
 		if (m_destroy) 
 			action.mtype = Inkball::ActionType::DELETE_SELF;
 	};
-	virtual void onCollision(Ball& ball)override {
+	virtual void onCollision(Ball& ball, unsigned long& score)override {
 		
 		if (m_color == ball.getColor()) 
 			m_destroy = true;

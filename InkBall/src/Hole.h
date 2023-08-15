@@ -45,8 +45,8 @@ public:
 	virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const override {
 		target.draw(m_sprite, states);
 	}
-	void onContact(Ball & ball,bool& remove) override {
-	
+	void onContact(Ball & ball,bool& remove,bool& matched,unsigned long& score) override {
+
 	sf::FloatRect ballBounds  = ball.getSprite().getGlobalBounds();
 	sf::Vector2f ballCenter   = sf::Vector2f(ballBounds.left + ballBounds.width/2.0f, ballBounds.top + ballBounds.height / 2.0f);
 
@@ -55,15 +55,24 @@ public:
 	float dist = Collsion::length(m_holeCenter - ballCenter);
 		if ( dist < radiusOuter ) {
 		
-			ball.getSprite().setScale(inScale - sf::Vector2f(0.07f, 0.07f));
+			ball.getSprite().setScale(inScale - sf::Vector2f(0.05f, 0.05f));
 			ball.setVelocity(ball.getVelocity() + ( (m_holeCenter - ballCenter) / Collsion::length(m_holeCenter - ballCenter) ) * 8.0f);
 	  
-			if (dist < innerRadius) // ball is assumed to enter the hole
+			if (dist < innerRadius) {   // ball is assumed to enter the hole
 				remove = true;
+				if (m_color != ball.getColor()) {
+					if (m_color == Inkball::Textures::Color::WHITE)
+						score += 5;
+					else
+						matched = false;
+				}
+				else
+					score += 10;
+			}
 
 		}
 
-	}
+	} 
 private:
 	std::shared_ptr<keyType>m_keyLoc;
 	Inkball::Textures::Color m_color;

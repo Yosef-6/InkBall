@@ -46,8 +46,8 @@ bool Level::loadLevel(std::string &lvl) // exceptions are a handled in game stat
 			m_levelmap[cellx][celly].emplace_back(createTile(pos, entityInfo, entity));
 		else if (entityInfo[0] == static_cast<std::size_t>(Inkball::Textures::EntityType::BALL)) {
 			//ball is special object is not fixd inside the table (moves over the table)
-			auto [ball, spawn] = createBall(pos, entityInfo, entity);
-			m_balls.emplace_back( ball,spawn );
+			auto [ball, spawn, update] = createBall(pos, entityInfo, entity);
+			m_balls.emplace_back( ball, spawn, update );
 		}
 		else
 		throw std::runtime_error("Level::loadLevel - unknown format ");
@@ -55,7 +55,10 @@ bool Level::loadLevel(std::string &lvl) // exceptions are a handled in game stat
 	file.close();
 
 	//load backg if it has not been loaded previously
+	if(m_prevLoaded == false)
 	loadHud();
+
+	loadDisplay();
 }
 
 void Level::loadPreview(sf::RenderTexture& base, const char * path)
@@ -199,14 +202,7 @@ void Level::updateLevel(sf::Time dt)
 				
 				if (action.mtype == Inkball::ActionType::DELETE_SELF) 
 					m_levelmap[i][j].pop_back();
-
-		
-
-				//...cbb
 			}
-
-
-
 }
 
 
@@ -225,24 +221,43 @@ int Level::findNthOccur(const std::string &str, char ch, int N)
 	
 }
 
+void Level::loadDisplay()
+{
+	if (m_balls.size() > 0) {
+		std::sort(m_balls.begin(), m_balls.end(), [](Level::ballInfo& a, Level::ballInfo& b) {return  a.m_spawnAfter < b.m_spawnAfter; });
+		int I = m_balls.size();
+		for (auto i = m_balls.rbegin(); i != m_balls.rend(); i++) {
+			if (i->m_supdate) {
+				m_ballsDisplay.emplace_back(*(i->s_ball)->getSprite().getTexture());
+				m_ballsDisplay.back().setScale(0.7, 0.7);
+				m_ballsDisplay.back().setPosition(-15 + 23 * I--, 5);
+			}
+		}
+	}
+}
+
 void Level::loadHud()
 {
 	
 	Resource& res = Resource::getResourceHandle();
-	m_levelHud.emplace_back(new sf::Sprite (res.getTexture(std::tuple<int,int,int>(static_cast<int>(Inkball::Textures::OtherType::FLOOR),0,0))));
+	m_levelHud.emplace_back(res.getTexture(std::tuple<int,int,int>(static_cast<int>(Inkball::Textures::OtherType::FLOOR),0,0)));
+
 	//other textures
-	m_levelHud[0]->setPosition(0, Inkball::CELL_SIZE); // set floor
-	                                                   //level elements
-													   // 
-													   // 
-													   // 
-													   // 
-													   // 
-													   // 
-													   // 
-													   // 
-													   // 
-													   // 
+	m_levelHud[0].setPosition(0, Inkball::CELL_SIZE); // set floor;;
+	m_levelHud.emplace_back(res.getTexture(std::tuple<int, int, int>(static_cast<int>(Inkball::Textures::OtherType::HUD), 0, 0)));                                   //level elements
+	m_levelHud[1].setPosition(0, 0);
+
+	//texts score, highscore, level timer
+
+	for (int i=0; i<=3;i++)
+	m_levelStr.emplace_back("0", res.getFont(Inkball::Fonts::ARCADE),15U);
+ 
+	m_levelStr[0].setPosition(175.0f, 6.0f);
+	m_levelStr[1].setPosition(325.0f, 6.0f);
+	m_levelStr[2].setPosition(469.0f, 6.0f);
+	m_levelStr[2].setFillColor(sf::Color::Black);
+	m_levelStr[3].setPosition(510.0f, 6.0f);
+
 	//.....
 }
 
@@ -277,7 +292,7 @@ Block* Level::createBlock(const std::vector<std::size_t>& loc,const std::vector<
     throw std::runtime_error("Level::loadLevel - failed due to unknown format");
 }
 
-std::tuple<Ball*,float> Level::createBall(const std::vector<std::size_t>& loc,const std::vector<std::size_t>& id, const std::string& sub)
+std::tuple<Ball*,float,bool> Level::createBall(const std::vector<std::size_t>& loc,const std::vector<std::size_t>& id, const std::string& sub)
 {   
 	const Resource& res = Resource::getResourceHandle();
 	size_t leftP  = findNthOccur(sub, '<', 3);
@@ -285,13 +300,13 @@ std::tuple<Ball*,float> Level::createBall(const std::vector<std::size_t>& loc,co
 	auto vel      = parseInp<float>(sub.substr(leftP + 1, rightP - (leftP + 1)),2);
 	auto spawn    = parseInp<std::size_t>(sub.substr(rightP + 2,1),1);
 
-	if (spawn[0] <= 0)
-		return { new Ball(sf::Vector2f(vel[0], vel[1]), sf::Vector2u(loc[0], loc[1]), static_cast<Inkball::Textures::Color>(id[2]), res.getTexture(std::tuple<int, int, int>(id[0], id[1], id[2]))) , 0.0f };
+	if (spawn[0] == 0)
+		return { new Ball(sf::Vector2f(vel[0], vel[1]), sf::Vector2u(loc[0], loc[1]), static_cast<Inkball::Textures::Color>(id[2]), res.getTexture(std::tuple<int, int, int>(id[0], id[1], id[2]))) , 0.0f , false};
 	else{
 		leftP  = findNthOccur(sub,'<', 5);
 		rightP = findNthOccur(sub,'>', 5);
 	auto spawnTime= parseInp<float>(sub.substr(leftP + 1, rightP - (leftP + 1)), 1);
-	return  { new Ball(sf::Vector2f(vel[0],vel[1]),sf::Vector2u(loc[0],loc[1]), static_cast<Inkball::Textures::Color>(id[2]),res.getTexture(std::tuple<int, int, int>(id[0], id[1], id[2]))) ,spawnTime[0]};
+	return  { new Ball(sf::Vector2f(vel[0],vel[1]),sf::Vector2u(loc[0],loc[1]), static_cast<Inkball::Textures::Color>(id[2]),res.getTexture(std::tuple<int, int, int>(id[0], id[1], id[2]))) ,spawnTime[0],true};
 	}
 }
 
@@ -356,9 +371,8 @@ Tile* Level::createTile(const std::vector<std::size_t>& loc,const std::vector<st
 
 void Level::ballInfo::status(sf::Time dt)
 {
-	if (s_spawnAfter > sf::Time::Zero)
-		s_spawnAfter -= dt;
-	else if(s_ready!=true)
-		s_ready = true;
-	
+	if (m_spawnAfter > sf::Time::Zero)
+		m_spawnAfter -= dt;
+	else 
+		m_spawnAfter = sf::Time::Zero;
 }

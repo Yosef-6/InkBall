@@ -4,23 +4,32 @@
 #include <iostream>
 #include <SFML/Graphics/RectangleShape.hpp>
 
-
-
+constexpr int SCORE = 0;
+constexpr int HIGH_SCORE = 1;
+constexpr int LEVEL = 2;
+constexpr int TIME = 3;
+ 
 GameState::GameState(StateStack& stack, sf::RenderWindow* window, std::vector<std::string>&& level,size_t currLevel ): State(stack, window),
 m_score(0), m_vertices(), m_lastMousePos(0, 0), m_pressed(false), m_set(false), m_remove(),m_levelInfo(level),m_levelPointer(currLevel)
 {
 	m_level.loadLevel(m_levelInfo[m_levelPointer]);
+    
 }
 
  void GameState::draw()
 {
 	 // draw hud
+	 
 
 
 	 for (const auto& hud : m_level.m_levelHud) 
-		 m_window->draw(*hud);
+		 m_window->draw(hud);
 	 
+	 for (const auto& hudStr : m_level.m_levelStr)
+		 m_window->draw(hudStr);
 
+	 for (const auto& I : m_level.m_ballsDisplay)
+		 m_window->draw(I);
 
 	 for (std::size_t i = 0; i < Inkball::SCREEN_WIDTH / Inkball::CELL_SIZE; i++)
 		 for (int j = 0; j < Inkball::SCREEN_WIDTH / Inkball::CELL_SIZE; j++)
@@ -43,7 +52,7 @@ m_score(0), m_vertices(), m_lastMousePos(0, 0), m_pressed(false), m_set(false), 
 	// draw balls
 
 	 for(const auto & ball : m_level.m_balls)
-		 if (ball.s_ready)
+		 if (!ball.m_supdate)
 			 m_window->draw(*ball.s_ball);
 
      //draw lines 
@@ -122,12 +131,32 @@ bool GameState::update(sf::Time dt)
 		m_lastMousePos= sf::Vector2f(sf::Mouse::getPosition().x - m_window->getPosition().x + mOffset.x, sf::Mouse::getPosition().y - m_window->getPosition().y + mOffset.y);
 
 
+	//display 
+
+
+
+
+	//
 
 	// update balls and resolve any collsion
 	size_t i = 0; //could have used normal for loop
 	for (auto&ball : m_level.m_balls) {
+	   
 		ball.status(dt);
-		if (ball.s_ready) {
+		
+		if (ball.m_supdate && ball.m_spawnAfter >= sf::Time::Zero && ball.m_spawnAfter < dt * 5.0f) {
+			 
+			if (!ball.m_threadCreated) {
+				
+				m_uiThread = std::thread(&GameState::updateUiAnim, this,&ball);
+				m_uiThread.detach();
+				ball.m_threadCreated = true;
+			}
+		}
+	
+	    // since the balls are sorted in increasing order of spawn time
+		
+		if ((!ball.m_supdate)  &  (!ball.m_remove)) {
 			ball.s_ball->update(dt);
 			auto pos = ball.s_ball->getPosition();
 
@@ -139,7 +168,7 @@ bool GameState::update(sf::Time dt)
 			for (auto& cell : cells) {//cells to 
 				
 
-				if ((cell.x >= 0 && cell.x <= 16) && (cell.y >= 0 && cell.y <= 16)){ // due to speed of the ball it might be near to the edge
+				if ((cell.x >= 0 && cell.x <= 16) && (cell.y >= 0 && cell.y <= 16) ){ // due to speed of the ball it might be near to the edge
 					
 					if (!m_level.m_levelmap[cell.x][cell.y].empty()) {
 
@@ -148,8 +177,11 @@ bool GameState::update(sf::Time dt)
 							Tile* tile = (static_cast<Tile*>(&*m_level.m_levelmap[cell.x][cell.y].back()));
 							//check for precise collsions  cell.x,cell.y,Inkball::CELL_SIZE, Inkball::CELL_SIZE
 							auto [hit, dir] = Collsion::collsionEnt(ball.s_ball->getSprite(),tile->getBounds(), false); // no recoil needed for tile entity
-							if (hit)
-								tile->onContact(*ball.s_ball,ball.remove);
+							if (hit) {
+								tile->onContact(*ball.s_ball, ball.m_remove, ball.m_match, m_score);
+								if (ball.m_remove)
+									break;
+							}
 					   	}
 						else if (m_level.m_levelmap[cell.x][cell.y].back()->getID() == (std::size_t)Inkball::Textures::EntityType::BLOCK)
 						{
@@ -167,7 +199,7 @@ bool GameState::update(sf::Time dt)
 									else if (dir == Inkball::HitDir::DOWN || dir == Inkball::HitDir::UP)
 										ball.s_ball->setVelocity(vel.x, -vel.y);
 
-									block->onCollision(*ball.s_ball);
+									block->onCollision(*ball.s_ball,m_score);
 
 								}
 								else if (dir == Inkball::HitDir::REV)
@@ -237,11 +269,17 @@ bool GameState::update(sf::Time dt)
 		i++;
 	}
 
-	//remove balls from level
+	//remove balls from level iterator might be invaldated 2 or more balls might be removed
 	std::vector < std::vector<Level::ballInfo> ::iterator > removeList;
 	for (auto it = m_level.m_balls.begin(); it < m_level.m_balls.end(); it++) {
-		if(it->remove)
-		removeList.emplace_back(it);
+		if (it->m_remove) {
+			removeList.emplace_back(it);
+
+
+			m_level.m_levelStr[SCORE].setString(std::to_string(m_score));//setScore
+
+
+		}
 	}
 
 	for (const auto &it : removeList)
@@ -283,5 +321,17 @@ bool GameState::handleEvent(const sf::Event& event)
 GameState::~GameState()
 {
 	m_vertices.clear();
+	if (m_uiThread.joinable()) {
+		m_uiThread.join();
+	}
+}
+
+void GameState::updateUiAnim(Level::ballInfo* ptr)
+{
+	std::lock_guard<std::mutex> grd(m_key);
+
+    
+	ptr->m_supdate = false;
+	
 }
 
