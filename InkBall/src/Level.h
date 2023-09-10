@@ -6,6 +6,7 @@
 #include <sstream>
 #include "Identifiers.h"
 #include <SFML/Graphics/RenderTexture.hpp>
+#include <list>
 #include "Tile.h"
 #include "Block.h"
 #include "Ball.h"

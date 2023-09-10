@@ -24,9 +24,9 @@ private:
 	bool m_set;
 	std::size_t m_animated = 0;
 	Level m_level;
-	std::thread m_uiThread;
+	size_t m_counter; 
 	std::mutex m_key;
-	void updateUiAnim(Level::ballInfo*);
+	void updateUiAnim(Level::ballInfo&);
 	unsigned long m_score;
 	unsigned long m_highScore;
 	std::vector<sf::Vector2u> coll;

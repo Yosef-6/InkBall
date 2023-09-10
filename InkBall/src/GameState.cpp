@@ -13,14 +13,17 @@ GameState::GameState(StateStack& stack, sf::RenderWindow* window, std::vector<st
 m_score(0), m_vertices(), m_lastMousePos(0, 0), m_pressed(false), m_set(false), m_remove(),m_levelInfo(level),m_levelPointer(currLevel)
 {
 	m_level.loadLevel(m_levelInfo[m_levelPointer]);
-    
+	if (m_level.m_balls.size() - 1 >= 0)
+		m_counter = m_level.m_balls.size() - 1;
 }
 
  void GameState::draw()
 {
 	 // draw hud
 	 
-
+     
+	 for (const auto& I : m_level.m_ballsDisplay)
+		 m_window->draw(I);
 
 	 for (const auto& hud : m_level.m_levelHud) 
 		 m_window->draw(hud);
@@ -28,8 +31,6 @@ m_score(0), m_vertices(), m_lastMousePos(0, 0), m_pressed(false), m_set(false), 
 	 for (const auto& hudStr : m_level.m_levelStr)
 		 m_window->draw(hudStr);
 
-	 for (const auto& I : m_level.m_ballsDisplay)
-		 m_window->draw(I);
 
 	 for (std::size_t i = 0; i < Inkball::SCREEN_WIDTH / Inkball::CELL_SIZE; i++)
 		 for (int j = 0; j < Inkball::SCREEN_WIDTH / Inkball::CELL_SIZE; j++)
@@ -52,7 +53,7 @@ m_score(0), m_vertices(), m_lastMousePos(0, 0), m_pressed(false), m_set(false), 
 	// draw balls
 
 	 for(const auto & ball : m_level.m_balls)
-		 if (!ball.m_supdate)
+		 if (!ball.m_supdate && !ball.m_remove)
 			 m_window->draw(*ball.s_ball);
 
      //draw lines 
@@ -79,9 +80,6 @@ m_score(0), m_vertices(), m_lastMousePos(0, 0), m_pressed(false), m_set(false), 
 bool GameState::update(sf::Time dt)
 {
 	
-	//std::cout<<m_vertices.size() <<std::endl;
-
-
 	if (m_pressed)
 	{
 		sf::Vector2f pos(sf::Mouse::getPosition().x - m_window->getPosition().x + mOffset.x, sf::Mouse::getPosition().y - m_window->getPosition().y + mOffset.y);
@@ -145,18 +143,35 @@ bool GameState::update(sf::Time dt)
 		ball.status(dt);
 		
 		if (ball.m_supdate && ball.m_spawnAfter >= sf::Time::Zero && ball.m_spawnAfter < dt * 5.0f) {
-			 
-			if (!ball.m_threadCreated) {
+			
+			if (i != 0 ) {
 				
-				m_uiThread = std::thread(&GameState::updateUiAnim, this,&ball);
-				m_uiThread.detach();
-				ball.m_threadCreated = true;
+				if (!ball.m_threadCreated && m_level.m_balls[i - 1].m_supdate == false) {
+
+				    std::thread	m_uiThread = std::thread(&GameState::updateUiAnim, this, std::ref(ball));
+					m_uiThread.detach();
+					ball.m_threadCreated = true;
+
+				}
+				
 			}
+			else {
+				if (!ball.m_threadCreated) {
+					std::thread	m_uiThread = std::thread(&GameState::updateUiAnim, this, std::ref(ball));
+					m_uiThread.detach();
+					ball.m_threadCreated = true;
+				}	
+			
+			}
+			
 		}
 	
+	
+	
+
 	    // since the balls are sorted in increasing order of spawn time
 		
-		if ((!ball.m_supdate)  &  (!ball.m_remove)) {
+		if (!ball.m_supdate & !ball.m_remove) {
 			ball.s_ball->update(dt);
 			auto pos = ball.s_ball->getPosition();
 
@@ -179,8 +194,17 @@ bool GameState::update(sf::Time dt)
 							auto [hit, dir] = Collsion::collsionEnt(ball.s_ball->getSprite(),tile->getBounds(), false); // no recoil needed for tile entity
 							if (hit) {
 								tile->onContact(*ball.s_ball, ball.m_remove, ball.m_match, m_score);
-								if (ball.m_remove)
-									break;
+								if (ball.m_match == false) {
+
+									//game over condition
+
+								}
+
+								if (ball.m_remove & ball.m_match) {
+
+									m_level.m_levelStr[SCORE].setString(std::to_string(m_score));
+
+								}
 							}
 					   	}
 						else if (m_level.m_levelmap[cell.x][cell.y].back()->getID() == (std::size_t)Inkball::Textures::EntityType::BLOCK)
@@ -236,7 +260,7 @@ bool GameState::update(sf::Time dt)
 					
 						    ///ball dynamic resoulution
 							for (size_t j = 0; j < m_level.m_balls.size(); j++) {
-								if (j != i && m_level.m_balls[j].s_ball->getPosition().x == cell.x && m_level.m_balls[j].s_ball->getPosition().y == cell.y) {
+								if (j != i && m_level.m_balls[j].m_remove == false && m_level.m_balls[j].m_supdate==false && m_level.m_balls[j].s_ball->getPosition().x == cell.x && m_level.m_balls[j].s_ball->getPosition().y == cell.y) {
 									auto& sp1 = ball.s_ball->getSprite();
 									auto& sp2 = m_level.m_balls[j].s_ball->getSprite();
 									auto vel2 = m_level.m_balls[j].s_ball->getVelocity();
@@ -269,29 +293,9 @@ bool GameState::update(sf::Time dt)
 		i++;
 	}
 
-	//remove balls from level iterator might be invaldated 2 or more balls might be removed
-	std::vector < std::vector<Level::ballInfo> ::iterator > removeList;
-	for (auto it = m_level.m_balls.begin(); it < m_level.m_balls.end(); it++) {
-		if (it->m_remove) {
-			removeList.emplace_back(it);
-
-
-			m_level.m_levelStr[SCORE].setString(std::to_string(m_score));//setScore
-
-
-		}
-	}
-
-	for (const auto &it : removeList)
-		m_level.m_balls.erase(it);
-	
-
-	
 	//finaly update level
 	m_level.updateLevel(dt);
 
-
-	
 	return true;
 }
 
@@ -300,6 +304,9 @@ bool GameState::handleEvent(const sf::Event& event)
 	if (event.type == sf::Event::KeyPressed ) {
 
 		if (event.key.code == sf::Keyboard::Escape) {
+			
+			sf::Clock clock;
+			while (clock.getElapsedTime().asSeconds() < 10.0f);
 			requestStackPop();
 			requestStackPush(Inkball::States::Id::TITLE);
 		}
@@ -321,17 +328,49 @@ bool GameState::handleEvent(const sf::Event& event)
 GameState::~GameState()
 {
 	m_vertices.clear();
-	if (m_uiThread.joinable()) {
-		m_uiThread.join();
-	}
 }
 
-void GameState::updateUiAnim(Level::ballInfo* ptr)
+void GameState::updateUiAnim(Level::ballInfo& ball)
 {
-	std::lock_guard<std::mutex> grd(m_key);
 
-    
-	ptr->m_supdate = false;
+
+	sf::Clock clock;
+
+	sf::Color col = m_level.m_ballsDisplay[m_counter].getColor();
+
+
+	for (int j = 3; j < 9; j++) {
+
+		m_level.m_ballsDisplay[m_counter].setColor(sf::Color::Transparent);
+
+		while (clock.getElapsedTime().asSeconds() < 1.0f - j * 0.09);
+
+		clock.restart();
+
+		m_level.m_ballsDisplay[m_counter].setColor(col);
+
+		while (clock.getElapsedTime().asSeconds() < 1.0f - j * 0.09);
+
+		clock.restart();
+		
+	}
+	m_level.m_ballsDisplay[m_counter].setColor(sf::Color::Transparent);
+
+	
+
+	for (int j = 0; j < m_level.m_ballsDisplay.size() - 1; j++)
+		m_level.m_ballsDisplay[j].setPosition(m_level.m_ballsDisplay[j + 1].getPosition());
+
+
+    m_level.m_ballsDisplay[m_counter].setColor(sf::Color::Transparent);
+
+
+	--m_counter;
+
+	ball.m_supdate = false;
 	
 }
+
+
+
 

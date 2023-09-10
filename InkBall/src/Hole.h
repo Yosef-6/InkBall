@@ -46,7 +46,9 @@ public:
 		target.draw(m_sprite, states);
 	}
 	void onContact(Ball & ball,bool& remove,bool& matched,unsigned long& score) override {
-
+	
+	if (remove)
+		return;
 	sf::FloatRect ballBounds  = ball.getSprite().getGlobalBounds();
 	sf::Vector2f ballCenter   = sf::Vector2f(ballBounds.left + ballBounds.width/2.0f, ballBounds.top + ballBounds.height / 2.0f);
 

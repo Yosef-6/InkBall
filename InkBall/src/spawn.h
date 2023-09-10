@@ -14,7 +14,7 @@ public:
 	}
 	void onContact(Ball& ball,bool& remove, bool& matches,unsigned long& score) override {
 		//
-		//
+	
 		//
 	}
 };
