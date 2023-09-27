@@ -4,7 +4,6 @@
 #include <vector>
 #include <SFML/Graphics/Sprite.hpp>
 #include <SFML/Graphics/Text.hpp>
-#include <functional>
 
 class GameState;
 
@@ -12,7 +11,7 @@ class MainMenu :  public State
 {
 public:
 	MainMenu(StateStack& stack, sf::RenderWindow* window);
-	virtual void  draw() override;
+	virtual bool  draw() override;
 	virtual bool  update(sf::Time dt) override;
 	virtual bool  handleEvent(const sf::Event& event) override;
 	virtual ~MainMenu() {};

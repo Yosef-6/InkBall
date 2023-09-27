@@ -15,7 +15,7 @@ class LevelManager : public State
 
 public:
 	LevelManager(StateStack& stack, sf::RenderWindow* window);
-	virtual void  draw() override;
+	virtual bool  draw() override;
 	virtual bool  update(sf::Time dt) override;
 	virtual bool  handleEvent(const sf::Event& event) override;
 	virtual ~LevelManager() {};

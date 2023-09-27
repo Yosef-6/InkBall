@@ -54,38 +54,17 @@ public:
 	}
 	virtual bool allowCollision(sf::Vector2f vel, Inkball::Textures::Color color) override {
 
-		sf::Vector2f dirs[4] = {
-			{0.0f, 1.0f},
-			{1.0f, 0.0f},
+		sf::Vector2f dirs[4] = { // this is the same orfering as enum Inkball::Direction
 			{0.0f, -1.0f},
 			{-1.0f, 0.0f},
-#if 0
-			{-0.707106f,0.707106f},
-			{0.707106f,0.707106f},
-			{-0.707106f,-0.707106f},
-			{0.707106f,-0.707106f},
-#endif // 0
-
+			{0.0f, 1.0f},
+			{1.0f, 0.0f},
 		};
 
-		double max = 0.0f;
-		size_t match = 100;
-
-		for (std::size_t i = 0; i < 4; i++) {
-
-			double dotProd = Collsion::dot(vel / Collsion::length(vel), dirs[i]);
-			if (dotProd > max) { 
-				max = dotProd;
-				match = i;
-			}
-
-		}
-
-
-		size_t dir = (size_t)m_logicDirection;
-		if (m_color == color && (match + 3 == dir  || match  == dir + 1 || match == dir + 2 ) ) //white paddle 
+		double dotProd = Collsion::dot(vel / Collsion::length(vel), dirs[(size_t)m_logicDirection-1]);
+		 
+		if (m_color == Inkball::Textures::Color::WHITE && dotProd > 0 || m_color == color && dotProd > 0)
 			return false;
-
 
 		return true;
 	}

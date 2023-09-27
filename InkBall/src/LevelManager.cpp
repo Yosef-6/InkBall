@@ -12,9 +12,9 @@ LevelManager::LevelManager(StateStack& stack, sf::RenderWindow* window):State(st
 	m_arrowLeft.setTexture(handle.getTexture(std::tuple<int, int, int>(static_cast<int>(Inkball::Textures::OtherType::MENU_LEFT), 0, 0)));
 	m_arrowRight.setTexture(handle.getTexture(std::tuple<int, int, int>(static_cast<int>(Inkball::Textures::OtherType::MENU_RIGHT), 0, 0)));
 
-	m_arrowLeft.scale(0.8,0.8);
-	m_arrowRight.scale(0.8,0.8);
-
+	m_arrowLeft.scale(0.8f,0.8f);
+	m_arrowRight.scale(0.8f,0.8f);
+	
 	Util::centerOrigin(m_arrowLeft);
 	Util::centerOrigin(m_arrowRight);
 
@@ -29,7 +29,7 @@ LevelManager::LevelManager(StateStack& stack, sf::RenderWindow* window):State(st
 	m_hover.setBuffer(handle.getSoundBuffer(Inkball::Sound::SoundEffects::HOVER));
 	m_click.setBuffer(handle.getSoundBuffer(Inkball::Sound::SoundEffects::MENU_CLICK));
 
-	m_level.setFont(handle.getFont(Inkball::Fonts::TEXT1));
+	m_level.setFont(handle.getFont(Inkball::Fonts::ARCADE));
 	m_level.setCharacterSize(35U);
 	m_level.setString("Level Select");
 	m_level.setPosition(Inkball::SCREEN_WIDTH / 3.3f, Inkball::SCREEN_HEIGHT / 11.0f);
@@ -47,11 +47,11 @@ LevelManager::LevelManager(StateStack& stack, sf::RenderWindow* window):State(st
 	
 	m_preview.display();
 	m_prev.setTexture(m_preview.getTexture());
-	m_prev.setScale(0.6, 0.6);
+	m_prev.setScale(0.6f, 0.6f);
 	m_prev.setPosition(118, 115);
 }
 
-void LevelManager::draw()
+bool LevelManager::draw()
 {
 	m_level.setString(m_levelFile[m_levelPointer]);
 	Util::centerOrigin(m_level);
@@ -61,6 +61,7 @@ void LevelManager::draw()
 	m_window->draw(m_arrowLeft);
 	m_window->draw(m_arrowRight);
 	m_window->draw(m_prev);
+	return false;
 }   
 
 
@@ -138,8 +139,8 @@ bool LevelManager::update(sf::Time dt)
 bool LevelManager::handleEvent(const sf::Event& event)
 {
 	if (event.type == sf::Event::MouseMoved) {
-		m_pos.x = event.mouseMove.x;
-		m_pos.y = event.mouseMove.y;
+		m_pos.x = (float)event.mouseMove.x;
+		m_pos.y = (float)event.mouseMove.y;
 	}
 	if (event.type == sf::Event::MouseButtonPressed)
 		m_pressed = true;

@@ -18,8 +18,8 @@ namespace Collsion {
 	static std::vector<sf::Vector2u> getCollsionQuadrant(const Vec2u& pos) {
 
 		return {
-		sf::Vector2u(pos.x + 1, pos.y), sf::Vector2u(pos.x - 1, pos.y), sf::Vector2u(pos.x + 1, pos.y - 1), sf::Vector2u(pos.x - 1, pos.y - 1), sf::Vector2u(pos.x, pos.y + 1), sf::Vector2u(pos.x, pos.y - 1) ,sf::Vector2u(pos.x - 1 ,pos.y + 1), sf::Vector2u(pos.x + 1, pos.y + 1),
-		sf::Vector2u(pos.x , pos.y),
+		sf::Vector2u(pos.x , pos.y),sf::Vector2u(pos.x + 1, pos.y), sf::Vector2u(pos.x - 1, pos.y), sf::Vector2u(pos.x + 1, pos.y - 1), sf::Vector2u(pos.x - 1, pos.y - 1), sf::Vector2u(pos.x, pos.y + 1), sf::Vector2u(pos.x, pos.y - 1) ,sf::Vector2u(pos.x - 1 ,pos.y + 1), sf::Vector2u(pos.x + 1, pos.y + 1),
+		
 		};
 
 	}

@@ -1,23 +1,25 @@
 #include "GameState.h"
 #include "Identifiers.h"
 #include "Collision.h"
-#include <iostream>
+
 #include <SFML/Graphics/RectangleShape.hpp>
 
 constexpr int SCORE = 0;
 constexpr int HIGH_SCORE = 1;
 constexpr int LEVEL = 2;
 constexpr int TIME = 3;
- 
-GameState::GameState(StateStack& stack, sf::RenderWindow* window, std::vector<std::string>&& level,size_t currLevel ): State(stack, window),
-m_score(0), m_vertices(), m_lastMousePos(0, 0), m_pressed(false), m_set(false), m_remove(),m_levelInfo(level),m_levelPointer(currLevel)
+constexpr float displayShiftX = 23.0f;
+GameState::GameState(StateStack& stack, sf::RenderWindow* window, std::vector<std::string>&& level, size_t currLevel) : State(stack, window),
+m_score(0), m_vertices(), m_lastMousePos(0, 0), m_pressed(false), m_levelInfo(level), m_levelPointer(currLevel)
 {
+
 	m_level.loadLevel(m_levelInfo[m_levelPointer]);
+	m_message = [&stack, window](Inkball::Mode mode) { return new MessageState(stack, window, mode); };
 	if (m_level.m_balls.size() - 1 >= 0)
 		m_counter = m_level.m_balls.size() - 1;
 }
 
- void GameState::draw()
+ bool GameState::draw()
 {
 	 // draw hud
 	 
@@ -57,40 +59,34 @@ m_score(0), m_vertices(), m_lastMousePos(0, 0), m_pressed(false), m_set(false), 
 			 m_window->draw(*ball.s_ball);
 
      //draw lines 
+	std::vector< std::list< vertex >::iterator > m_remove;
 	 for (auto it = m_vertices.begin(); it != m_vertices.end(); it++) {
 		 const auto& [arr,_, rem] = *it;
-		 if (rem) {
-			 m_remove = it;
-			 m_set = true;
-		 }
+		 if (rem)
+			 m_remove.push_back(it);
 		 else
 			 m_window->draw(arr);
 	 }
-	 //remove any lines
-	 if (m_set == true) {
-		 m_vertices.erase(m_remove);
-		 m_set = false;
-	 }
-
-		 
-	
+	 for (auto& i : m_remove) 
+		 m_vertices.erase(i);
+	 
+	 
+	 return true;
 }
- 
-
 bool GameState::update(sf::Time dt)
 {
-	
+   
 	if (m_pressed)
 	{
-		sf::Vector2f pos(sf::Mouse::getPosition().x - m_window->getPosition().x + mOffset.x, sf::Mouse::getPosition().y - m_window->getPosition().y + mOffset.y);
+		sf::Vector2f pos((float)sf::Mouse::getPosition().x - m_window->getPosition().x + mOffset.x, (float)sf::Mouse::getPosition().y - m_window->getPosition().y + mOffset.y);
 		if (m_lastMousePos != pos)
 		{
 
 
 			size_t locx = size_t(pos.x) / Inkball::CELL_SIZE;
-			size_t locy = size_t(pos.y) / Inkball::CELL_SIZE;
+			size_t locy = size_t(pos.y) / Inkball::CELL_SIZE - 1;
 			///)
-
+			
 			if (locx < 17 && locy < 17) {
 
 				if (m_vertices.size() == 0 || !std::get<1>(m_vertices.front())) {// { ,working  ,  remove}
@@ -101,24 +97,26 @@ bool GameState::update(sf::Time dt)
 	
 				
 				if (length > mSeparationCoff) {
-
 					sf::Vector2f unit = (pos - m_lastMousePos) / Collsion::length(pos - m_lastMousePos);
-
-					//std::cout << length << std::endl;
-					
 					for (float i = 1;; i+=1) {
-
-						if ( i > length)
+						if ( i > length )
 							break;
-
-						std::get<0>(m_vertices.front()).append(sf::Vertex(m_lastMousePos + sf::Vector2f(unit.x * i, unit.y * i), sf::Color::Black));
+						auto npos = m_lastMousePos + sf::Vector2f(unit.x * i, unit.y * i); //approximating long gaps 
+						size_t locxdef = size_t(npos.x) / Inkball::CELL_SIZE;
+						size_t locydef = size_t(npos.y) / Inkball::CELL_SIZE;
+						std::get<0>(m_vertices.front()).append(sf::Vertex(npos, sf::Color::Black));
+						m_lineSegments[locxdef][locydef].emplace(&(*m_vertices.begin()));
 					}
-
-
 				}
-				std::cout << pos.x << "   " << pos.y << std::endl;
+				std::cout << locx << "  :   " << locy << std::endl;
 				std::get<0>(m_vertices.front()).append(sf::Vertex(pos, sf::Color::Black));
 				m_lineSegments[locx][locy].emplace(&(*m_vertices.begin()));
+
+			}
+			else {
+				if (m_vertices.size() > 0)
+					std::get<1>(m_vertices.front()) = false;
+				m_pressed = false; // Reset line
 
 			}
 
@@ -129,12 +127,6 @@ bool GameState::update(sf::Time dt)
 		m_lastMousePos= sf::Vector2f(sf::Mouse::getPosition().x - m_window->getPosition().x + mOffset.x, sf::Mouse::getPosition().y - m_window->getPosition().y + mOffset.y);
 
 
-	//display 
-
-
-
-
-	//
 
 	// update balls and resolve any collsion
 	size_t i = 0; //could have used normal for loop
@@ -143,12 +135,12 @@ bool GameState::update(sf::Time dt)
 		ball.status(dt);
 		
 		if (ball.m_supdate && ball.m_spawnAfter >= sf::Time::Zero && ball.m_spawnAfter < dt * 5.0f) {
-			
-			if (i != 0 ) {
+		
+			if (i) {
 				
 				if (!ball.m_threadCreated && m_level.m_balls[i - 1].m_supdate == false) {
 
-				    std::thread	m_uiThread = std::thread(&GameState::updateUiAnim, this, std::ref(ball));
+				    std::thread	m_uiThread = std::thread(&GameState::updateUiAnim, this);
 					m_uiThread.detach();
 					ball.m_threadCreated = true;
 
@@ -157,7 +149,7 @@ bool GameState::update(sf::Time dt)
 			}
 			else {
 				if (!ball.m_threadCreated) {
-					std::thread	m_uiThread = std::thread(&GameState::updateUiAnim, this, std::ref(ball));
+					std::thread	m_uiThread = std::thread(&GameState::updateUiAnim, this);
 					m_uiThread.detach();
 					ball.m_threadCreated = true;
 				}	
@@ -174,11 +166,11 @@ bool GameState::update(sf::Time dt)
 		if (!ball.m_supdate & !ball.m_remove) {
 			ball.s_ball->update(dt);
 			auto pos = ball.s_ball->getPosition();
-
+			
 			// use velocity vector to check for neighbouring entitys 
 			auto vel = ball.s_ball->getVelocity();
 			auto cells = Collsion::getCollsionQuadrant(pos);
-			coll = cells; // collsion boundary  to be   removed later
+			//coll = cells; // collsion boundary  to be   removed later
 			//std::cout << pos.x <<"     " << pos.y << std::endl;
 			for (auto& cell : cells) {//cells to 
 				
@@ -237,13 +229,14 @@ bool GameState::update(sf::Time dt)
 					       //	std::cout  << m_vertices.size()<< std::endl;
 						    sf::Vector2f inScale = ball.s_ball->getSprite().getScale();
 						    ball.s_ball->getSprite().setScale( std::clamp(   float(inScale.x + 0.02) , 0.f ,0.8f ) , std::clamp(float(inScale.y + 0.02), 0.f, 0.8f)  );
-
+							
 						    if (m_lineSegments[cell.x][cell.y].size() > 0) {
 								
 								auto [hit,dir,rem] = Collsion::collsionLineSegment(ball.s_ball->getSprite(),m_lineSegments[cell.x][cell.y]);
 								if (hit) {
 								
 								     m_level.m_balls[i].s_ball->setVelocity(dir.x*100,dir.y*100);
+									
 
 									 for(size_t l = 0; l < Inkball::SCREEN_WIDTH / Inkball::CELL_SIZE; l++)
 										 for (size_t j = 0; j < Inkball::SCREEN_WIDTH / Inkball::CELL_SIZE; j++) {
@@ -255,6 +248,9 @@ bool GameState::update(sf::Time dt)
 
 								}
 
+							}
+							else {
+								
 							}
 						    
 					
@@ -292,11 +288,14 @@ bool GameState::update(sf::Time dt)
 		}
 		i++;
 	}
-
+	
 	//finaly update level
 	m_level.updateLevel(dt);
 
-	return true;
+	//remove any lines
+
+
+	return false;
 }
 
 bool GameState::handleEvent(const sf::Event& event)
@@ -305,10 +304,40 @@ bool GameState::handleEvent(const sf::Event& event)
 
 		if (event.key.code == sf::Keyboard::Escape) {
 			
-			sf::Clock clock;
-			while (clock.getElapsedTime().asSeconds() < 10.0f);
-			requestStackPop();
-			requestStackPush(Inkball::States::Id::TITLE);
+			
+
+			if (!m_key.try_lock()) {
+				//
+				// wait till it locks it
+				while (true) {
+					if (m_key.try_lock())
+						break;
+				}
+				//unlock
+				m_key.unlock();
+				// restore thread properties
+				m_counter++;
+				int index = m_level.m_balls.size() - 1 - m_counter;
+				m_level.m_balls[index].m_threadCreated = false;
+				m_level.m_balls[index].m_supdate = true;
+				m_level.m_ballsDisplay[m_counter].setColor(sf::Color::Magenta);
+				for (int j = 0; j < m_counter; j++)
+					m_level.m_ballsDisplay[j].setPosition(m_level.m_ballsDisplay[j].getPosition() + sf::Vector2f(displayShiftX, 0.0f));
+
+
+			}
+			else
+				m_key.unlock();
+
+
+
+			if (m_vertices.size() > 0)
+				std::get<1>(m_vertices.front()) = false;
+			m_pressed = false; // Reset line
+
+
+			
+			requestCustomStackPush(m_message(Inkball::Mode::PAUSED));
 		}
     }
 	else if (event.type == sf::Event::MouseButtonPressed) {
@@ -327,19 +356,24 @@ bool GameState::handleEvent(const sf::Event& event)
 
 GameState::~GameState()
 {
+
+	while (true) {
+			if (m_key.try_lock()) {
+				m_key.unlock();
+				break;
+			}
+	}
+	
 	m_vertices.clear();
 }
 
-void GameState::updateUiAnim(Level::ballInfo& ball)
+void GameState::updateUiAnim()
 {
-
-
+	std::lock_guard<std::mutex> lock(m_key);
+	size_t index = m_level.m_balls.size() - 1 - m_counter;
 	sf::Clock clock;
-
 	sf::Color col = m_level.m_ballsDisplay[m_counter].getColor();
-
-
-	for (int j = 3; j < 9; j++) {
+	for (int j = 5; j < 9; j++) {
 
 		m_level.m_ballsDisplay[m_counter].setColor(sf::Color::Transparent);
 
@@ -356,19 +390,13 @@ void GameState::updateUiAnim(Level::ballInfo& ball)
 	}
 	m_level.m_ballsDisplay[m_counter].setColor(sf::Color::Transparent);
 
-	
-
-	for (int j = 0; j < m_level.m_ballsDisplay.size() - 1; j++)
+	for (int j = 0; j < m_level.m_ballsDisplay.size() - 1; j++) 
 		m_level.m_ballsDisplay[j].setPosition(m_level.m_ballsDisplay[j + 1].getPosition());
-
+	
 
     m_level.m_ballsDisplay[m_counter].setColor(sf::Color::Transparent);
-
-
 	--m_counter;
-
-	ball.m_supdate = false;
-	
+	m_level.m_balls[index].m_supdate = false;
 }
 
 

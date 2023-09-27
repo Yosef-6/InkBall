@@ -3,10 +3,13 @@
 class Track :  public Tile
 {
 public:
-	Track(sf::Vector2u pos, const sf::Texture& tex, Inkball::Direction spriteDir,sf::Vector2f vel = sf::Vector2f()) :Tile(vel, pos, tex),m_spriteDir(spriteDir) {
+	Track(sf::Vector2u pos, const sf::Texture& tex,sf::Vector2f vel = sf::Vector2f()) :Tile(vel, pos, tex) {
 		auto l_pos = m_sprite.getPosition();
 		m_sprite.setOrigin(Inkball::CELL_SIZE / 2.0f, Inkball::CELL_SIZE / 2.0f);
-		m_sprite.rotate(static_cast<int>(spriteDir) * -90.0f);
+		if (vel.x == 0)
+			vel.x = 0.000001f;
+		m_sprite.rotate(180.0f / 3.14159265 * atan((vel.y/vel.x )));
+		std::cout << 180.0f / 3.14159265 * atan((vel.y / vel.x)) << vel.x<< vel.y << std::endl;
 		m_sprite.setPosition(l_pos.x + Inkball::CELL_SIZE / 2.0f, l_pos.y + Inkball::CELL_SIZE / 2.0f);
 	}
 	virtual ~Track() {}
@@ -19,7 +22,5 @@ public:
 		//std::cout << " " << getVelocity().x << "   :   " << getVelocity().y << std::endl;
 		ball.setVelocity(ball.getVelocity() + getVelocity());
 	}
-private:
-	Inkball::Direction m_spriteDir;
 };
 

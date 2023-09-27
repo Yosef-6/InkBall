@@ -262,8 +262,8 @@ void Level::loadHud()
 }
 
 Block* Level::createBlock(const std::vector<std::size_t>& loc,const std::vector<std::size_t>& id, const std::string& sub)
-{   //id 0 , 1 , 2, 3  corresponds to
-	//   E   Ec  C  O  (entityType, entityClass,Color,Orientaion)
+{   //id 0 , 1 , 2  corresponds to
+	//   E   Ec  C   (entityType, entityClass,Color)
 	const Resource& res = Resource::getResourceHandle();
 
 	if (id[1] == static_cast<std::size_t>(Inkball::Textures::BlockType::COLORED))
@@ -359,11 +359,9 @@ Tile* Level::createTile(const std::vector<std::size_t>& loc,const std::vector<st
 
 			int left1 = findNthOccur(sub, '>', 2);
 			auto vel = parseInp<float>(sub.substr(left1 + 2, findNthOccur(sub, '>', 3) - left1 + 1 ), 2);
-			left1 = findNthOccur(sub,'>',3) + 2 ;
-			auto dir = parseInp<std::size_t>(sub.substr(left1, 1), 1);
 			if (left1 == -1)
 				throw std::runtime_error("Level::loadLevel - failed due to unknown format");                                                                    //this velocity is used for track component  not for the track itself
-			return new Track(sf::Vector2u(loc[0], loc[1]), res.getTexture(std::tuple<int, int, int>(id[0], id[1], id[2])), static_cast<Inkball::Direction>(dir[0]),sf::Vector2f(vel[0],vel[1])); // set the velocity for track
+			return new Track(sf::Vector2u(loc[0], loc[1]), res.getTexture(std::tuple<int, int, int>(id[0], id[1], id[2])),sf::Vector2f(vel[0],vel[1])); // set the velocity for track
 		}
 		else
 		throw std::runtime_error("Level::loadLevel - failed due to unknown format");

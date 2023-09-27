@@ -16,26 +16,26 @@ MainMenu::MainMenu(StateStack& stack, sf::RenderWindow* window):State(stack,wind
     m_hover.setBuffer(handle.getSoundBuffer(Inkball::Sound::SoundEffects::HOVER));
     m_click.setBuffer(handle.getSoundBuffer(Inkball::Sound::SoundEffects::MENU_CLICK));
     
-    m_menu.setFont(handle.getFont(Inkball::Fonts::TEXT1));
+    m_menu.setFont(handle.getFont(Inkball::Fonts::ARCADE));
     m_menu.setCharacterSize(40U);
-    m_menu.setString("MAIN MENU");
-    m_menu.setPosition(Inkball::SCREEN_WIDTH / 3.1f, Inkball::SCREEN_HEIGHT / 5.0f);
+    m_menu.setString("Main MENU");
+    m_menu.setPosition(Inkball::SCREEN_WIDTH / 2.8f, Inkball::SCREEN_HEIGHT / 5.0f);
     m_menu.setOutlineThickness(2);
 
-    m_items.emplace_back("Play", handle.getFont(Inkball::Fonts::TEXT1),34U );
-    m_items.emplace_back("Create Level", handle.getFont(Inkball::Fonts::TEXT1), 34U);
-    m_items.emplace_back("Stats", handle.getFont(Inkball::Fonts::TEXT1), 34U);
-    m_items.emplace_back("Exit", handle.getFont(Inkball::Fonts::TEXT1), 34U);
+    m_items.emplace_back("Play", handle.getFont(Inkball::Fonts::ARCADE),34U );
+    m_items.emplace_back("Create  Level", handle.getFont(Inkball::Fonts::ARCADE));
+    m_items.emplace_back("Stats", handle.getFont(Inkball::Fonts::ARCADE), 34U);
+    m_items.emplace_back("Exit", handle.getFont(Inkball::Fonts::ARCADE), 34U);
 
     unsigned char i = 0;
     for (sf::Text& text : m_items) {
-        text.setOutlineThickness(2);
+        text.setOutlineThickness(1.8f);
         text.setPosition(window->getView().getSize().x / 2.8f, window->getView().getSize().y / 1.8f + i * 50);
         i++;
     }
 }
 
-void MainMenu::draw()
+bool MainMenu::draw()
 { 
     m_window->draw(m_backg);
     m_window->draw(m_menu);
@@ -52,31 +52,48 @@ void MainMenu::draw()
         
         i++;
     }
+    return false;
 }
 
 bool MainMenu::update(sf::Time dt)
 {
     
     
-    unsigned char i = 0;
+    unsigned int i = 0;
     for (sf::Text& text : m_items) {
 
         if (text.getGlobalBounds().contains(m_pos)) {
             
             if (m_currentItemPointer != i)
                 m_hover.play();
+
+            m_currentItemPointer = i;
+
+           
+
             if (m_pressed) {
                 m_click.play();
                 m_pressed = false;
-
-                std::size_t elapsedTime = 0;
                 while (m_click.getStatus() == sf::Sound::Playing);
                 requestStackPop();
-                requestStackPush(Inkball::States::Id::LEVEL_MANAGER);
-                //requestCustomStackPush(m_game());
-     
+                switch (i)
+                {
+                case 0:
+                    requestStackPush(Inkball::States::Id::LEVEL_MANAGER);
+                    break;
+                case 1:
+                    requestStackPush(Inkball::States::Id::LEVEL_EDITOR);
+                    break;
+                case 2:
+                    break;
+                case 3:
+                    break;
+
+                default:
+                    break;
+                }
+
             }
-            m_currentItemPointer = i;
         }
         i++;
     }

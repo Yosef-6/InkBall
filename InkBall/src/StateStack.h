@@ -2,7 +2,7 @@
 #include "State.h"
 #include <vector>
 #include <functional>
-#include <map>
+#include <unordered_map>
 #include <SFML/System/NonCopyable.hpp>
 #include <SFML/System/Time.hpp>
 #include "Identifiers.h"
@@ -66,7 +66,7 @@ private:
 	std::vector<State::Ptr>		m_Stack;
 	std::vector<PendingChange>	m_PendingList;
 	sf::RenderWindow* m_window;
-	std::map<Inkball::States::Id, std::function<State::Ptr()>> m_Factories;
+	std::unordered_map<Inkball::States::Id, std::function<State::Ptr()>> m_Factories;
 };
 
 

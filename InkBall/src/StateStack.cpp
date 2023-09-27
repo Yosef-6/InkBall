@@ -19,8 +19,11 @@ void StateStack::update(sf::Time dt)
 
 void StateStack::draw()
 {
-    for (const auto& state : m_Stack)
-        state->draw();
+       for (auto itr = m_Stack.begin(); itr != m_Stack.end(); ++itr)
+       {
+        if (!(*itr)->draw())
+            break;
+       }
 
 }
 

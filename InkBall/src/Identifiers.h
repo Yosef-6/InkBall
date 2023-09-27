@@ -15,7 +15,11 @@ namespace Inkball{
 		NOHIT,
 	};
 
-
+	enum class Mode {
+		GAME_OVER,
+		PAUSED,
+		GAME_WON,
+	};
 
 	enum class ActionType {
 		DELETE_SELF =0,
@@ -74,12 +78,13 @@ namespace Inkball{
 		enum class OtherType {
 			FLOOR = -1,
 			S_FLOOR = -2,
-			LOGO  = -3,
+			LOGO = -3,
 			MENU_FLOOR = -4,
 			ERROR_PREVIEW = -5,
 			MENU_RIGHT = -6,
-			MENU_LEFT  = -7,
-			HUD=-8,
+			MENU_LEFT = -7,
+			HUD = -8,
+			PAUSE = -9,
 			//...
 		};
 	}
@@ -90,6 +95,7 @@ namespace Inkball{
 			MAIN_MENU,
 			TITLE,
 			LEVEL_MANAGER,
+			LEVEL_EDITOR,
 			//...
 		};
 	}
