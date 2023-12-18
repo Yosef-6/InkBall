@@ -1,12 +1,16 @@
 
  # InkBall
-## This repo contains inkball clone written in c++ and sfml 
+## This repo contains inkball(a computer game that is included with Windows XP Tablet PC Edition 2005 and Windows Vista) clone written in c++ and sfml 
 
-- Every behaviour of each entity is compleated change the lvl1 (lvl editor will be soon added ;) file to see various objects and there interactions.
+- A fresh new look to inkball with a custom level editor check the screen shots below.
 
-<img src="https://user-images.githubusercontent.com/95920190/224821485-44cc84a3-e0dc-44fa-ba84-4458348ac181.PNG" width="30%" ></img>
-<img src="https://user-images.githubusercontent.com/95920190/224821132-83978046-93c9-4ea4-b2c5-78574d37bdc2.PNG" width="30%" height="90%"> </img><img src="https://user-images.githubusercontent.com/95920190/224821514-cdb428cc-b151-4b3f-9ed4-332e1789945a.PNG" width="30%"></img>
-</img>
+<div style="display: flex; justify-content: space-between; max-width: 1200px; margin: 0 auto;">
+    <img src="https://github.com/Yosef-6/InkBall/assets/95920190/5205e08c-c2af-4d86-ade6-af17a6aa2a8a" alt="Image 1" width="18%">
+    <img src="https://github.com/Yosef-6/InkBall/assets/95920190/549c7985-dbd1-4dab-a16f-ff6495e4859f" alt="Image 2" width="18%">
+    <img src="https://github.com/Yosef-6/InkBall/assets/95920190/e3ac0d8c-4353-40d9-bbb7-a0ddade7f321" alt="Image 3" width="18%">
+    <img src="https://github.com/Yosef-6/InkBall/assets/95920190/38291e42-fba3-439d-8424-f1bee7e4d690" alt="Image 4" width="18%">
+    <img src="https://github.com/Yosef-6/InkBall/assets/95920190/d23d5fd7-3df6-48e1-b3da-816218a98322" alt="Image 5" width="18%">
+</div>
 
 ---
 ## So far
@@ -17,7 +21,8 @@
 - finalize collisions b/n balls and line
 - gameplay
 - menu system
-## Things to be done
+## In progress
 - level editor
-- integration
+## Things to be done
+- integration and refactoring
 
