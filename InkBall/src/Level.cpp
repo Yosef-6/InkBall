@@ -36,7 +36,6 @@ bool Level::loadLevel(std::string &lvl) // exceptions are a handled in game stat
 		std::size_t celly = pos[1];
 		if(cellx >= Inkball::SCREEN_WIDTH / Inkball::CELL_SIZE || celly >= Inkball::SCREEN_WIDTH / Inkball::CELL_SIZE)
 			throw std::runtime_error("Level::loadLevel - unknown format ");
-	//	std::cout<<cellx<<"   "<<celly<<std::endl;
 	    //E entity Ec entity class C 
 		int left =  findNthOccur(entity, '<', 2) + 1; //6
 		auto entityInfo = parseInp<std::size_t>(entity.substr(left, findNthOccur(entity, '>', 2) - left), 3);
@@ -63,7 +62,6 @@ bool Level::loadLevel(std::string &lvl) // exceptions are a handled in game stat
 
 void Level::loadPreview(sf::RenderTexture& base, const char * path)
 {
-
 	const Resource& res = Resource::getResourceHandle();
 
 	if (!base.create(Inkball::SCREEN_WIDTH, Inkball::SCREEN_WIDTH)) // 
@@ -238,8 +236,8 @@ void Level::loadDisplay()
 
 void Level::loadHud()
 {
+	const Resource& res = Resource::getResourceHandle();
 	
-	Resource& res = Resource::getResourceHandle();
 	m_levelHud.emplace_back(res.getTexture(std::tuple<int,int,int>(static_cast<int>(Inkball::Textures::OtherType::FLOOR),0,0)));
 
 	//other textures
@@ -295,6 +293,7 @@ Block* Level::createBlock(const std::vector<std::size_t>& loc,const std::vector<
 std::tuple<Ball*,float,bool> Level::createBall(const std::vector<std::size_t>& loc,const std::vector<std::size_t>& id, const std::string& sub)
 {   
 	const Resource& res = Resource::getResourceHandle();
+	
 	size_t leftP  = findNthOccur(sub, '<', 3);
 	size_t rightP = findNthOccur(sub, '>', 3);
 	auto vel      = parseInp<float>(sub.substr(leftP + 1, rightP - (leftP + 1)),2);
@@ -323,8 +322,8 @@ Tile* Level::createTile(const std::vector<std::size_t>& loc,const std::vector<st
 			4   1,2,3,4,5,6,7,8
 		if key count  == 0 no need to parse further
 #endif // 0
-
-	    const Resource& res = Resource::getResourceHandle();
+	   const Resource& res = Resource::getResourceHandle();
+	  
 	
 		if (id[1] == static_cast<std::size_t>(Inkball::Textures::TileType::HOLE)) {
 			size_t leftP = findNthOccur(sub, '<', 3);

@@ -84,7 +84,12 @@ namespace Inkball{
 			MENU_RIGHT = -6,
 			MENU_LEFT = -7,
 			HUD = -8,
-			PAUSE = -9,
+			EDITER_HUD = -9,
+			ITEM_SELECT=-10,
+			ITEMS=-11,
+			ERROR=-12,
+			CORRECT=-13,
+			PAUSE = -14,
 			//...
 		};
 	}

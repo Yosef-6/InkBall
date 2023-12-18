@@ -87,7 +87,13 @@ void Resource::loadTextures() //loads all the textures
 	m_textureHolder.load(std::tuple<int, int, int>(static_cast<int>(Inkball::Textures::OtherType::MENU_LEFT), 0, 0), "res/textures/arrowLeft.png");
 	m_textureHolder.load(std::tuple<int, int, int>(static_cast<int>(Inkball::Textures::OtherType::MENU_RIGHT), 0, 0), "res/textures/arrowRight.png");
 	m_textureHolder.load(std::tuple<int, int, int>(static_cast<int>(Inkball::Textures::OtherType::HUD), 0, 0), "res/textures/hud.png");
+	m_textureHolder.load(std::tuple<int, int, int>(static_cast<int>(Inkball::Textures::OtherType::EDITER_HUD), 0, 0), "res/textures/lvlEditor.png");
+	m_textureHolder.load(std::tuple<int, int, int>(static_cast<int>(Inkball::Textures::OtherType::ITEM_SELECT), 0, 0), "res/textures/itemSelect.png");
+	m_textureHolder.load(std::tuple<int, int, int>(static_cast<int>(Inkball::Textures::OtherType::ITEMS), 0, 0), "res/textures/items.png");
 	m_textureHolder.load(std::tuple<int, int, int>(static_cast<int>(Inkball::Textures::OtherType::PAUSE), 0, 0), "res/textures/pause.png");
+	m_textureHolder.load(std::tuple<int, int, int>(static_cast<int>(Inkball::Textures::OtherType::CORRECT), 0, 0), "res/textures/correct.png");
+	m_textureHolder.load(std::tuple<int, int, int>(static_cast<int>(Inkball::Textures::OtherType::ERROR), 0, 0), "res/textures/error.png");
+
 }
 
 void Resource::loadSoundEffects()
